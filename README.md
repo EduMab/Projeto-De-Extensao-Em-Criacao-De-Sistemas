@@ -1,13 +1,15 @@
 # 🤖📚 Projeto: Plano de Estudos com IA
 
-Olá, Seja muito Bem-vindo(a) ao nosso projeto! Aqui temos nossa ideia elaborada criada para o Projeto do nosso curso. Um assistente de planejamento de estudos personalizado, desenvolvido por Inteligência Artificial.
+Olá, Seja muito Bem-vindo(a) ao nosso projeto! Nossa proposta é um assistente de planejamento de estudos personalizado, desenvolvido com Inteligência Artificial para auxiliar estudantes na organização de sua rotina e no alcance de seus objetivos.
 
 #  Sobre o Projeto:
 
-Nossa ideia é uma plataforma movida por IA que atua como orientador educacional e atinge diretamente a ODS 4 (Educação de Qualidade) da ONU, democratizando o acesso à orientação de estudos ao transformar metas de vestibulares e concursos públicos em planos completos e estruturados.
+A plataforma consiste em um assistente de planejamento de estudos personalizado, desenvolvido com IA para auxiliar estudantes na preparação para vestibulares, concursos públicos ou outros objetivos. 
 
+Alinhada à ODS 4 — Educação de Qualidade, a solução busca democratizar o acesso à orientação de estudos, enfrentando problemas como falta de direcionamento, dificuldade na organização do tempo e cronogramas pouco realistas, que podem levar à desmotivação e à desistência.
 
-O projeto ataca diretamente a falta de direcionamento, os cronogramas irrealistas e o alto custo das mentorias privadas, barreiras que geram ansiedade e causam a desistência de muitos estudantes sem acesso. Com isso, utilizando um modelo de linguagem via API como motor central, o sistema gera cronogramas semanais baseados no objetivo do usuário, sintetiza resumos sob demanda para cada tópico e reorganiza o planejamento automaticamente em caso de atrasos, oferecendo uma solução acessível e adaptativa para quem não pode pagar por cursinhos preparatórios.
+A Inteligência Artificial é o principal diferencial da nossa plataforma, utilizando um modelo integrado por API para analisar os objetivos, disponibilidade, prazos e progresso de cada usuário. A partir desses dados, a IA gera cronogramas personalizados, recomenda prioridades, produz resumos de conteúdos, tornando a orientação de estudos mais acessível, prática e adaptativa, especialmente para estudantes que não possuem condições de investir em mentorias ou cursinhos.
+
 
 
 ## 🧩 Diagrama de Classes:
