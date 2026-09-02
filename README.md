@@ -8,3 +8,66 @@ Nossa ideia é uma plataforma movida por IA que atua como orientador educacional
 
 
 O projeto ataca diretamente a falta de direcionamento, os cronogramas irrealistas e o alto custo das mentorias privadas, barreiras que geram ansiedade e causam a desistência de muitos estudantes sem acesso. Com isso, utilizando um modelo de linguagem via API como motor central, o sistema gera cronogramas semanais baseados no objetivo do usuário, sintetiza resumos sob demanda para cada tópico e reorganiza o planejamento automaticamente em caso de atrasos, oferecendo uma solução acessível e adaptativa para quem não pode pagar por cursinhos preparatórios.
+
+
+## 🧩 Diagrama de Classes:
+
+
+```mermaid
+classDiagram
+
+class Aluno {
+    -int id
+    -String nome
+    -String email
+    -String senha
+    +cadastrar()
+    +atualizarPerfil()
+    +visualizarPlano()
+}
+
+class ObjetivoEstudo {
+    -int id
+    -String descricao
+    -Date dataLimite
+    -String prioridade
+    +definirObjetivo()
+    +atualizarPrazo()
+}
+
+class Disciplina {
+    -int id
+    -String nome
+    -String dificuldade
+    +adicionarConteudo()
+}
+
+class Conteudo {
+    -int id
+    -String titulo
+    -String dificuldade
+    -String status
+    +marcarConcluido()
+}
+
+class PlanoEstudos {
+    -int id
+    -Date dataCriacao
+    -Date dataInicio
+    -Date dataFim
+    -String status
+    +atualizarPlano()
+}
+
+class AssistenteIA {
+    +gerarPlano()
+    +reorganizarPlano()
+    +sugerirPrioridades()
+}
+
+Aluno  -->  ObjetivoEstudo
+Aluno  -->  Disciplina
+Aluno  -->  PlanoEstudos
+Disciplina  -->  Conteudo
+AssistenteIA --> PlanoEstudos
+```
