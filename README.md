@@ -73,4 +73,10 @@ Aluno  -->  PlanoEstudos
 Disciplina  -->  Conteudo
 AssistenteIA --> PlanoEstudos
 ```
+
+## Diagrama Contexto do Sistema
+<img width="762" height="1090" alt="Diagrama sem nome drawio" src="https://github.com/user-attachments/assets/ea4784a5-ea6c-4b26-9f8f-1886bdc67b0e" />
+
+## Diagrama Contêiner 
+
 <img width="782" height="1105" alt="Diagrama contêiner drawio" src="https://github.com/user-attachments/assets/29c442b8-7765-4816-921c-4d405cd4037c" />
