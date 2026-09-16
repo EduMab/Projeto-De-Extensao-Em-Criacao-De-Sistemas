@@ -74,13 +74,16 @@ Disciplina  -->  Conteudo
 AssistenteIA --> PlanoEstudos
 ```
 
-## Diagrama Contexto do Sistema
+## Diagrama Contexto do Sistema (Nível 1)  
 
 
-Diagrama de contexto do sistema para apresentar uma visão geral do programa e suas interações com o mundo exterior.
+Diagrama de contexto do sistema (nível 1) para apresentar uma visão geral do programa e suas interações com o mundo exterior.
 
 <img width="762" height="1090" alt="Diagrama sem nome drawio" src="https://github.com/user-attachments/assets/ea4784a5-ea6c-4b26-9f8f-1886bdc67b0e" />
 
-## Diagrama Contêiner 
+## Diagrama Contêiner (Nível 2)
+
+
+Diagrama de Contêineres (Nível 2) expande o sistema para mostrar sua arquitetura de alto nível. Sua função principal é expor as escolhas de tecnologia, as responsabilidades de cada parte do software e como elas se comunicam.
 
 <img width="782" height="1105" alt="Diagrama contêiner drawio" src="https://github.com/user-attachments/assets/29c442b8-7765-4816-921c-4d405cd4037c" />
