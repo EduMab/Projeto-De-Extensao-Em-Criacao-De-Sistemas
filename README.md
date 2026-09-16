@@ -75,6 +75,10 @@ AssistenteIA --> PlanoEstudos
 ```
 
 ## Diagrama Contexto do Sistema
+
+
+Diagrama de contexto do sistema para apresentar uma visão geral do programa e suas interações com o mundo exterior.
+
 <img width="762" height="1090" alt="Diagrama sem nome drawio" src="https://github.com/user-attachments/assets/ea4784a5-ea6c-4b26-9f8f-1886bdc67b0e" />
 
 ## Diagrama Contêiner 
