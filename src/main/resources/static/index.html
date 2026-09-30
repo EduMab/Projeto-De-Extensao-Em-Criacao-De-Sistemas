@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Evolua+</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            min-height: 100vh;
+            color: #222;
+        }
+
+        /* =========================
+           TOPO DO USUÁRIO
+        ========================= */
+
+        .topo-usuario {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 5%;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .topo-usuario span {
+            color: #333;
+            font-size: 14px;
+        }
+
+        .topo-usuario button {
+            width: auto;
+            margin: 0;
+            padding: 8px 18px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .topo-usuario button:hover {
+            background-color: #bb2d3b;
+        }
+
+        /* =========================
+           CABEÇALHO
+        ========================= */
+
+        header {
+            background-color: #6f4bc3;
+            color: white;
+            padding: 35px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin-bottom: 7px;
+            font-size: 36px;
+        }
+
+        header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        /* =========================
+           CONTAINER PRINCIPAL
+        ========================= */
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 35px auto;
+        }
+
+        .grid-principal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        /* =========================
+           CARDS
+        ========================= */
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-bottom: 18px;
+            color: #333;
+            font-size: 22px;
+        }
+
+        /* =========================
+           DESEMPENHO
+        ========================= */
+
+        .desempenho {
+            font-size: 46px;
+            font-weight: bold;
+            color: #6f4bc3;
+            margin: 18px 0;
+        }
+
+        .estatisticas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .estatistica {
+            background-color: #f7f5fc;
+            padding: 15px 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .estatistica span {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .estatistica strong {
+            font-size: 20px;
+            color: #333;
+        }
+
+        /* =========================
+           SIMULADO
+        ========================= */
+
+        .simulado-card {
+            grid-column: 1 / -1;
+        }
+
+        #questaoAtual {
+            margin-bottom: 20px;
+        }
+
+        #questaoAtual h3 {
+            color: #6f4bc3;
+            margin-bottom: 12px;
+        }
+
+        #questaoAtual p {
+            margin: 10px 0;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        #questaoAtual small {
+            color: #777;
+        }
+
+        #alternativas {
+            margin: 20px 0;
+        }
+
+        #alternativas div {
+            margin: 10px 0;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        #alternativas div:hover {
+            border-color: #6f4bc3;
+            background-color: #faf9fd;
+        }
+
+        #alternativas label {
+            cursor: pointer;
+            display: block;
+        }
+
+        #alternativas input {
+            margin-right: 8px;
+        }
+
+        /* =========================
+           SELECT
+        ========================= */
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 7px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: #6f4bc3;
+        }
+
+        /* =========================
+           BOTÕES
+        ========================= */
+
+        .botao-principal {
+            width: 100%;
+            padding: 13px;
+            border-radius: 7px;
+            border: none;
+            margin-top: 15px;
+            background-color: #6f4bc3;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .botao-principal:hover {
+            background-color: #5b3aaa;
+        }
+
+        /* =========================
+           IA
+        ========================= */
+
+        #recomendacao {
+            line-height: 1.7;
+            color: #444;
+            margin-top: 20px;
+        }
+
+        #resultadoSimulado {
+            margin-top: 20px;
+        }
+
+        .resultado-percentual {
+            font-size: 42px;
+            font-weight: bold;
+            color: #6f4bc3;
+            margin: 15px 0 25px;
+        }
+
+        .recomendacao-final {
+            line-height: 1.7;
+            margin-top: 15px;
+            color: #444;
+        }
+
+        /* =========================
+           RESPONSIVIDADE
+        ========================= */
+
+        .barra-progresso {
+            width: 100%;
+            height: 8px;
+            background-color: #eee;
+            border-radius: 10px;
+            margin: 15px 0 22px;
+            overflow: hidden;
+        }
+
+        .barra-progresso-preenchimento {
+            height: 100%;
+            background-color: #6f4bc3;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 800px) {
+
+            .grid-principal {
+                grid-template-columns: 1fr;
+            }
+
+            .simulado-card {
+                grid-column: auto;
+            }
+
+            .estatisticas {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 30px;
+            }
+
+            .container {
+                width: 94%;
+                margin: 20px auto;
+            }
+
+            .card {
+                padding: 22px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- =========================
+     USUÁRIO
+========================= -->
+
+<div class="topo-usuario">
+
+    <span>
+        Olá, <strong id="nomeUsuario">Estudante</strong>!
+    </span>
+
+    <button
+            type="button"
+            onclick="sair()">
+        Sair
+    </button>
+
+</div>
+
+
+<!-- =========================
+     CABEÇALHO
+========================= -->
+
+<header>
+
+    <h1>Evolua+</h1>
+
+    <p>
+        Seu desempenho, seus estudos, sua evolução.
+    </p>
+
+</header>
+
+
+<!-- =========================
+     CONTEÚDO
+========================= -->
+
+<div class="container">
+
+    <div class="grid-principal">
+
+
+        <!-- DESEMPENHO -->
+
+        <div class="card">
+
+            <h2>Desempenho do estudante</h2>
+
+            <p>
+                Percentual atual de acertos:
+            </p>
+
+            <div class="desempenho">
+                <span id="percentual">Carregando...</span>%
+            </div>
+
+
+            <div class="estatisticas">
+
+                <div class="estatistica">
+
+                    <span>
+                        Respondidas
+                    </span>
+
+                    <strong id="totalRespostas">
+                        ...
+                    </strong>
+
+                </div>
+
+
+                <div class="estatistica">
+
+                    <span>
+                        Acertos
+                    </span>
+
+                    <strong id="acertos">
+                        ...
+                    </strong>
+
+                </div>
+
+
+                <div class="estatistica">
+
+                    <span>
+                        Erros
+                    </span>
+
+                    <strong id="erros">
+                        ...
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECOMENDAÇÃO IA -->
+
+        <div class="card">
+
+            <h2>Recomendação da IA</h2>
+
+            <p>
+                Escolha uma disciplina:
+            </p>
+
+            <select id="disciplina">
+
+                <option value="Matemática">
+                    Matemática
+                </option>
+
+                <option value="Português">
+                    Português
+                </option>
+
+                <option value="História">
+                    História
+                </option>
+
+                <option value="Geografia">
+                    Geografia
+                </option>
+
+                <option value="Biologia">
+                    Biologia
+                </option>
+
+                <option value="Física">
+                    Física
+                </option>
+
+                <option value="Química">
+                    Química
+                </option>
+
+            </select>
+
+
+            <button
+                    class="botao-principal"
+                    onclick="gerarRecomendacao()">
+
+                Gerar recomendação
+
+            </button>
+
+
+            <div id="recomendacao">
+                A recomendação aparecerá aqui.
+            </div>
+
+        </div>
+
+
+        <!-- SIMULADO -->
+
+        <div
+                class="card simulado-card"
+                id="simulado">
+
+            <h2>Simulado ETEC</h2>
+
+            <div id="questaoAtual"></div>
+
+            <div id="alternativas"></div>
+
+
+            <button
+                    class="botao-principal"
+                    id="btnProxima"
+                    onclick="proximaQuestao()">
+
+                Próxima questão
+
+            </button>
+
+
+            <div id="resultadoSimulado"></div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* =========================
+       USUÁRIO
+    ========================= */
+
+    const idEstudante =
+        localStorage.getItem("idEstudante");
+
+    const nomeEstudante =
+        localStorage.getItem("nomeEstudante");
+
+
+    if (!idEstudante) {
+
+        window.location.replace("/login.html");
+
+    } else {
+
+        document.getElementById(
+            "nomeUsuario"
+        ).innerText =
+            nomeEstudante || "Estudante";
+
+    }
+
+
+    function sair() {
+
+        localStorage.clear();
+
+        window.location.replace("/login.html");
+
+    }
+
+
+    /* =========================
+       SIMULADO
+    ========================= */
+
+    let questoes = [];
+
+    let indiceAtual = 0;
+
+    let respostas = {};
+
+
+    function carregarSimulado() {
+
+        fetch("/questoes/prova/1")
+
+            .then(response =>
+                response.json()
+            )
+
+            .then(data => {
+
+                questoes = data;
+
+                indiceAtual = 0;
+
+                respostas = {};
+
+                mostrarQuestao();
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+                document.getElementById(
+                    "questaoAtual"
+                ).innerText =
+                    "Erro ao carregar o simulado.";
+
+            });
+
+    }
+
+
+    function mostrarQuestao() {
+
+        const questao =
+            questoes[indiceAtual];
+
+
+        const questaoAtual =
+            document.getElementById(
+                "questaoAtual"
+            );
+
+
+        const alternativas =
+            document.getElementById(
+                "alternativas"
+            );
+
+
+        const progresso =
+            ((indiceAtual + 1) / questoes.length) * 100;
+
+        questaoAtual.innerHTML = `
+
+    <h3>
+        Questão ${indiceAtual + 1}
+        de ${questoes.length}
+    </h3>
+
+    <div class="barra-progresso">
+        <div
+            class="barra-progresso-preenchimento"
+            style="width: ${progresso}%">
+        </div>
+    </div>
+
+    <p>
+        ${questao.enunciado}
+    </p>
+
+    <small>
+        Dificuldade:
+        ${questao.dificuldade}
+    </small>
+
+`;
+
+
+        alternativas.innerHTML = "";
+
+
+        questao.alternativas.forEach(
+            (alternativa, indice) => {
+
+                const letra =
+                    String.fromCharCode(
+                        65 + indice
+                    );
+
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.innerHTML = `
+
+                    <label>
+
+                        <input
+                            type="radio"
+                            name="alternativa"
+                            value="${alternativa.idAlternativa}"
+                        >
+
+                        ${letra})
+                        ${alternativa.texto}
+
+                    </label>
+
+                `;
+
+
+                alternativas.appendChild(
+                    div
+                );
+
+            }
+        );
+
+
+        const btn =
+            document.getElementById(
+                "btnProxima"
+            );
+
+        btn.disabled = false;
+
+
+        if (
+            indiceAtual ===
+            questoes.length - 1
+        ) {
+
+            btn.innerText =
+                "Finalizar simulado";
+
+        } else {
+
+            btn.innerText =
+                "Próxima questão";
+
+        }
+
+    }
+
+
+    function proximaQuestao() {
+
+        const selecionada =
+            document.querySelector(
+                'input[name="alternativa"]:checked'
+            );
+
+
+        if (!selecionada) {
+
+            alert(
+                "Selecione uma alternativa antes de continuar."
+            );
+
+            return;
+
+        }
+
+        const btnProxima =
+            document.getElementById("btnProxima");
+
+        btnProxima.disabled = true;
+        btnProxima.innerText = "Salvando...";
+
+
+        const idAlternativa =
+            parseInt(
+                selecionada.value
+            );
+
+
+        const questao =
+            questoes[indiceAtual];
+
+
+        fetch(
+
+            `/respostas/salvar?` +
+            `idEstudante=${idEstudante}` +
+            `&idQuestao=${questao.idQuestao}` +
+            `&idAlternativa=${idAlternativa}`,
+
+            {
+                method: "POST"
+            }
+
+        )
+
+            .then(response =>
+                response.text()
+            )
+
+            .then(data => {
+
+                console.log(
+                    "Resposta registrada. Acertou:",
+                    data
+                );
+
+
+                respostas[
+                    questao.idQuestao
+                    ] = idAlternativa;
+
+
+                if (
+                    indiceAtual <
+                    questoes.length - 1
+                ) {
+
+                    indiceAtual++;
+
+                    mostrarQuestao();
+
+                } else {
+
+                    finalizarSimulado();
+
+                }
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+                btnProxima.disabled = false;
+                btnProxima.innerText = "Tentar novamente";
+
+                alert(
+                    "Erro ao salvar a resposta."
+                );
+
+            });
+
+    }
+
+
+    /* =========================
+       FORMATAÇÃO DA IA
+    ========================= */
+
+    function formatarRecomendacao(texto) {
+
+        if (!texto) {
+            return "";
+        }
+
+
+        let formatado = texto;
+
+
+        formatado =
+            formatado.replace(
+                /\\\*/g,
+                "*"
+            );
+
+
+        formatado = formatado
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            );
+
+
+        formatado =
+            formatado.replace(
+
+                /\*\*([^*]+?)\*\*/g,
+
+                "<strong>$1</strong>"
+
+            );
+
+
+        formatado =
+            formatado.replace(
+
+                /^\s*\*\s+/gm,
+
+                "• "
+
+            );
+
+
+        formatado =
+            formatado.replace(
+
+                /\r?\n/g,
+
+                "<br>"
+
+            );
+
+
+        return formatado;
+
+    }
+
+
+    /* =========================
+       FINALIZAR SIMULADO
+    ========================= */
+
+    function finalizarSimulado() {
+
+        fetch(
+
+            "/simulado/finalizar" +
+
+            `?idEstudante=${idEstudante}` +
+
+            "&idProva=1" +
+
+            "&disciplina=" +
+
+            encodeURIComponent(
+                "Matemática"
+            ),
+
+            {
+                method: "POST"
+            }
+
+        )
+
+            .then(response =>
+                response.json()
+            )
+
+            .then(data => {
+
+
+                document.getElementById(
+                    "simulado"
+                ).innerHTML = `
+
+                    <h2>
+                        Simulado finalizado!
+                    </h2>
+
+                    <p>
+                        Seu desempenho:
+                    </p>
+
+                    <div
+                        class="resultado-percentual">
+
+                        ${data.percentual.toFixed(2)}%
+
+                    </div>
+
+
+                    <h3>
+                        Recomendação da IA
+                    </h3>
+
+
+                    <div
+                        id="recomendacaoFinal"
+                        class="recomendacao-final">
+                    </div>
+
+
+                    <button
+                        class="botao-principal"
+                        onclick="location.reload()">
+
+                        Refazer simulado
+
+                    </button>
+
+                `;
+
+
+                document.getElementById(
+                    "recomendacaoFinal"
+                ).innerHTML =
+
+                    formatarRecomendacao(
+                        data.recomendacao
+                    );
+
+
+                carregarDesempenho();
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+
+                document.getElementById(
+                    "simulado"
+                ).innerHTML = `
+
+                    <h2>
+                        Erro
+                    </h2>
+
+                    <p>
+                        Não foi possível finalizar
+                        o simulado.
+                    </p>
+
+                `;
+
+            });
+
+    }
+
+
+    /* =========================
+       GERAR RECOMENDAÇÃO
+    ========================= */
+
+    function gerarRecomendacao() {
+
+        const disciplina =
+            document.getElementById(
+                "disciplina"
+            ).value;
+
+
+        const recomendacao =
+            document.getElementById(
+                "recomendacao"
+            );
+
+
+        recomendacao.innerText =
+            "Gerando recomendação...";
+
+
+        fetch(
+
+            `/ia/recomendacao/${idEstudante}` +
+
+            `?idProva=1` +
+
+            `&disciplina=${encodeURIComponent(
+                disciplina
+            )}`
+
+        )
+
+            .then(response =>
+                response.text()
+            )
+
+            .then(data => {
+
+                recomendacao.innerHTML =
+                    formatarRecomendacao(
+                        data
+                    );
+
+            })
+
+            .catch(error => {
+
+                recomendacao.innerText =
+                    "Erro ao buscar recomendação.";
+
+                console.error(error);
+
+            });
+
+    }
+
+
+    /* =========================
+       DESEMPENHO
+    ========================= */
+
+    function carregarDesempenho() {
+
+        const percentual =
+            document.getElementById(
+                "percentual"
+            );
+
+
+        const totalRespostas =
+            document.getElementById(
+                "totalRespostas"
+            );
+
+
+        const acertos =
+            document.getElementById(
+                "acertos"
+            );
+
+
+        const erros =
+            document.getElementById(
+                "erros"
+            );
+
+
+        fetch(
+            `/ia/resumo/${idEstudante}`
+        )
+
+            .then(response =>
+                response.json()
+            )
+
+            .then(data => {
+
+                percentual.innerText =
+                    data.percentual.toFixed(1);
+
+                totalRespostas.innerText =
+                    data.totalRespostas;
+
+                acertos.innerText =
+                    data.acertos;
+
+                erros.innerText =
+                    data.erros;
+
+            })
+
+            .catch(error => {
+
+                percentual.innerText =
+                    "Erro";
+
+                totalRespostas.innerText =
+                    "Erro";
+
+                acertos.innerText =
+                    "Erro";
+
+                erros.innerText =
+                    "Erro";
+
+                console.error(error);
+
+            });
+
+    }
+
+
+    /* =========================
+       INICIALIZAÇÃO
+    ========================= */
+
+    carregarSimulado();
+
+    carregarDesempenho();
+
+</script>
+
+</body>
+
+</html>
