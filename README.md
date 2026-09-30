@@ -1,89 +1,241 @@
-# 🤖📚 Projeto: Plano de Estudos com IA
+# 🎓 Evolua+ — Plataforma Educacional com Inteligência Artificial
 
-Olá, Seja muito Bem-vindo(a) ao nosso projeto! Nossa proposta é um assistente de planejamento de estudos personalizado, desenvolvido com Inteligência Artificial para auxiliar estudantes na organização de sua rotina e no alcance de seus objetivos.
+## 📚 Sobre o Projeto
 
-#  Sobre o Projeto:
+O Evolua+ é uma aplicação educacional desenvolvida para auxiliar estudantes na preparação para provas, como ETEC, ENEM, vestibulares e concursos.
 
-A plataforma consiste em um assistente de planejamento de estudos personalizado, desenvolvido com IA para auxiliar estudantes na preparação para vestibulares, concursos públicos ou outros objetivos. 
+O projeto está alinhado à ODS 4 — Educação de Qualidade, buscando utilizar tecnologia e Inteligência Artificial para apoiar o processo de aprendizagem e fornecer ao estudante uma análise personalizada de seu desempenho.
 
-Alinhada à ODS 4 — Educação de Qualidade, a solução busca democratizar o acesso à orientação de estudos, enfrentando problemas como falta de direcionamento, dificuldade na organização do tempo e cronogramas pouco realistas, que podem levar à desmotivação e à desistência.
+Nesta etapa foi desenvolvido um MVP (Produto Mínimo Viável), concentrando o sistema nas funcionalidades essenciais para validar a proposta.
 
-A Inteligência Artificial é o principal diferencial da nossa plataforma, utilizando um modelo integrado por API para analisar os objetivos, disponibilidade, prazos e progresso de cada usuário. A partir desses dados, a IA gera cronogramas personalizados, recomenda prioridades, produz resumos de conteúdos, tornando a orientação de estudos mais acessível, prática e adaptativa, especialmente para estudantes que não possuem condições de investir em mentorias ou cursinhos.
+## 🎯 Funcionalidades principais do MVP
 
+O MVP foi concentrado em três funcionalidades principais:
 
+1. Realização e armazenamento de um simulado.
+2. Cálculo do desempenho do estudante e análise dos erros utilizando Inteligência Artificial.
+3. Geração, armazenamento e exibição de recomendações personalizadas de estudo.
 
-## 🧩 Diagrama de Classes:
+O sistema também possui funcionalidades de apoio, como cadastro, login e identificação do estudante.
 
+## 🤖 Inteligência Artificial
+
+A Inteligência Artificial é utilizada para analisar o desempenho do estudante após a realização do simulado.
+
+O sistema considera informações como:
+
+- percentual de acertos;
+- questões respondidas incorretamente;
+- disciplina relacionada;
+- desempenho registrado no banco de dados.
+
+Essas informações são utilizadas para montar um prompt enviado a um modelo de IA por meio da API da OpenRouter.
+
+A resposta gerada contém recomendações personalizadas de estudo e é armazenada no banco de dados para ser apresentada ao estudante.
+
+## 🛠️ Tecnologias utilizadas
+
+- Java 25
+- Spring Boot 3.5.6
+- Maven
+- MySQL 8.0
+- MySQL Workbench
+- HTML
+- CSS
+- JavaScript
+- OpenRouter API
+- IntelliJ IDEA
+- Git
+- GitHub
+- GitHub Projects
+
+## 🗃️ Banco de Dados
+
+O banco de dados utilizado pelo projeto é o MySQL.
+
+O MVP possui 9 entidades/tabelas principais:
+
+1. Usuario
+2. Estudante
+3. Prova
+4. Disciplina
+5. Questao
+6. Alternativa
+7. Resposta
+8. Desempenho
+9. RecomendacaoIA
+
+Essas entidades representam o núcleo necessário para o funcionamento do simulado, armazenamento das respostas, cálculo de desempenho e integração com Inteligência Artificial.
+
+## 🗺️ Modelo Entidade-Relacionamento (MER)
+
+O Modelo Entidade-Relacionamento foi obtido a partir do banco de dados utilizado pela aplicação.
+
+![Modelo Entidade-Relacionamento do Evolua+](doc/EvoluaMais_MER.png)
+
+O arquivo editável do modelo criado no MySQL Workbench também está disponível em:
+
+`doc/EvoluaMais_MER.mwb`
+
+## 🧩 Diagrama de Classes
+
+O projeto utiliza Programação Orientada a Objetos e possui como principais classes de domínio:
 
 ```mermaid
 classDiagram
 
-class Aluno {
-    -int id
+class Usuario {
+    -int idUsuario
     -String nome
     -String email
     -String senha
-    +cadastrar()
-    +atualizarPerfil()
-    +visualizarPlano()
 }
 
-class ObjetivoEstudo {
-    -int id
+class Estudante {
+    -int idEstudante
+    -int idUsuario
+    -int idProva
+}
+
+class Prova {
+    -int idProva
+    -String nome
     -String descricao
-    -Date dataLimite
-    -String prioridade
-    +definirObjetivo()
-    +atualizarPrazo()
 }
 
 class Disciplina {
-    -int id
+    -int idDisciplina
     -String nome
+}
+
+class Questao {
+    -int idQuestao
+    -String enunciado
     -String dificuldade
-    +adicionarConteudo()
+    -int idDisciplina
+    -int idProva
 }
 
-class Conteudo {
-    -int id
-    -String titulo
-    -String dificuldade
-    -String status
-    +marcarConcluido()
+class Alternativa {
+    -int idAlternativa
+    -String texto
+    -boolean correta
+    -int idQuestao
 }
 
-class PlanoEstudos {
-    -int id
-    -Date dataCriacao
-    -Date dataInicio
-    -Date dataFim
-    -String status
-    +atualizarPlano()
+class Resposta {
+    -int idResposta
+    -int idEstudante
+    -int idQuestao
+    -int idAlternativa
+    -boolean acertou
 }
 
-class AssistenteIA {
-    +gerarPlano()
-    +reorganizarPlano()
-    +sugerirPrioridades()
+class Desempenho {
+    -int idDesempenho
+    -int idEstudante
+    -int idDisciplina
+    -double percentualAcerto
 }
 
-Aluno  -->  ObjetivoEstudo
-Aluno  -->  Disciplina
-Aluno  -->  PlanoEstudos
-Disciplina  -->  Conteudo
-AssistenteIA --> PlanoEstudos
+class RecomendacaoIA {
+    -int idRecomendacao
+    -int idEstudante
+    -String analise
+}
+
+Usuario --> Estudante
+Estudante --> Prova
+Prova --> Questao
+Disciplina --> Questao
+Questao --> Alternativa
+Estudante --> Resposta
+Questao --> Resposta
+Alternativa --> Resposta
+Estudante --> Desempenho
+Disciplina --> Desempenho
+Estudante --> RecomendacaoIA
 ```
 
-## Diagrama Contexto do Sistema (Nível 1)  
+## 🏗️ Arquitetura
 
+O back-end foi desenvolvido utilizando Java e Spring Boot.
 
-Diagrama de contexto do sistema (nível 1) para apresentar uma visão geral do programa e suas interações com o mundo exterior.
+A aplicação está organizada em camadas, incluindo:
 
-<img width="762" height="1090" alt="Diagrama sem nome drawio" src="https://github.com/user-attachments/assets/ea4784a5-ea6c-4b26-9f8f-1886bdc67b0e" />
+- `model` — classes que representam as entidades do sistema;
+- `repository` — acesso e persistência dos dados no MySQL;
+- `service` — regras de negócio, cálculo de desempenho e integração com IA;
+- `controller` — endpoints da aplicação;
+- `config` — configuração da conexão com o banco de dados.
 
-## Diagrama Contêiner (Nível 2)
+O front-end utiliza HTML, CSS e JavaScript e se comunica com o back-end através dos endpoints disponibilizados pela aplicação.
 
+## 🔐 Configuração e Segurança
 
-Diagrama de Contêineres (Nível 2) expande o sistema para mostrar sua arquitetura de alto nível. Sua função principal é expor as escolhas de tecnologia, as responsabilidades de cada parte do software e como elas se comunicam.
+Informações sensíveis não são armazenadas diretamente no código-fonte.
 
-<img width="782" height="1105" alt="Diagrama contêiner drawio" src="https://github.com/user-attachments/assets/29c442b8-7765-4816-921c-4d405cd4037c" />
+Para executar o projeto, devem ser configuradas as seguintes variáveis de ambiente:
+
+```text
+OPENROUTER_API_KEY
+DB_USUARIO
+DB_SENHA
+```
+
+As senhas dos usuários são armazenadas utilizando hash BCrypt.
+
+As chaves de API e credenciais do banco de dados não devem ser adicionadas ao repositório.
+
+## 🔄 Fluxo principal da aplicação
+
+O fluxo principal do MVP é:
+
+`Estudante → Simulado → Respostas → Cálculo de desempenho → Análise pela IA → Recomendação personalizada`
+
+Após responder às questões, as respostas são armazenadas no MySQL. O sistema calcula o percentual de acertos e identifica os erros. Esses dados são enviados para a integração com IA, que gera uma recomendação de estudo posteriormente armazenada e exibida ao estudante.
+
+## 🌐 Diagrama de Contexto do Sistema — Nível 1
+
+O Diagrama de Contexto apresenta uma visão geral do Evolua+ e das interações do sistema com elementos externos.
+
+![Diagrama de Contexto](doc/Diagrama%20contexto%20do%20sistema.drawio.png)
+
+## 🏗️ Diagrama de Contêiner — Nível 2
+
+O Diagrama de Contêiner apresenta a arquitetura de alto nível, mostrando os principais componentes tecnológicos do sistema e como eles se comunicam.
+
+![Diagrama de Contêiner](doc/Diagrama%20cont%C3%AAiner.drawio.png)
+
+## 🚀 Execução do Projeto
+
+Para executar o projeto:
+
+1. Configure o banco MySQL `evoluamais`.
+2. Configure as variáveis de ambiente `DB_USUARIO`, `DB_SENHA` e `OPENROUTER_API_KEY`.
+3. Abra o projeto no IntelliJ IDEA.
+4. Instale/carregue as dependências Maven.
+5. Execute a classe `EvoluaMaisApplication`.
+6. Acesse a aplicação pelo navegador.
+
+## 📌 Status
+
+MVP funcional com:
+
+- cadastro e login de estudante;
+- realização de simulado;
+- armazenamento das respostas;
+- cálculo de desempenho;
+- identificação de erros;
+- integração com Inteligência Artificial;
+- geração de recomendação personalizada;
+- persistência da recomendação no banco de dados;
+- documentação do banco através de MER.
+
+## 🌱 ODS
+
+O projeto está relacionado à:
+
+**ODS 4 — Educação de Qualidade**
+
+A proposta busca utilizar tecnologia para apoiar estudantes no processo de preparação e aprendizagem, oferecendo análise de desempenho e orientação personalizada.
