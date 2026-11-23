@@ -4,7 +4,8 @@ O banco compartilhado no Railway ja recebeu 16 edicoes oficiais de 2017 a
 2026: 790 questoes, com 787 utilizaveis. A estrutura dos simulados diarios
 tambem ja esta aplicada nesse banco.
 
-1. Extraia o ZIP em uma **pasta nova**, preservando seu projeto atual.
+1. Atualize seu clone pelo GitHub/IntelliJ. Se usar o ZIP do repositorio,
+   extraia em uma **pasta nova**, preservando seu projeto atual.
 2. No IntelliJ, abra o `pom.xml` dessa pasta como projeto Maven e selecione
    o **JDK 25**. Aguarde o carregamento das dependencias.
 3. Na configuracao de execucao de `EvoluaMaisApplication`, preencha as
@@ -36,9 +37,8 @@ O codigo foi compilado com sete testes aprovados. O SQL foi conferido no
 MySQL real, e os fluxos da interface passaram por testes de DOM/JavaScript.
 A revisao visual em navegador fica para a execucao local.
 
-O acesso disponivel nesta sessao nao permitiu enviar as alteracoes ao
-GitHub. Este pacote contem a versao local completa, que ainda precisa ser
-integrada ao repositorio e publicada na API para disponibilizar a nova
-interface ao grupo. O banco ja esta atualizado.
+Os integrantes compartilham o codigo pelo repositorio GitHub. Atualize o
+clone antes de executar. A API hospedada deve usar esta versao do codigo
+para disponibilizar a nova interface; o banco da nuvem ja esta atualizado.
 
 Detalhes e fontes: [ETEC e simulados](doc/ETEC_E_SIMULADOS.md).

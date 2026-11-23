@@ -52,9 +52,8 @@ jdbc:mysql://thomas.proxy.rlwy.net:23871/evoluamais?sslMode=REQUIRED&connectionT
 ```
 
 Nao coloque senhas ou chaves no GitHub. As configuracoes de deploy estao em
-[DEPLOY_NUVEM.md](DEPLOY_NUVEM.md). A integracao disponivel nesta sessao nao
-conseguiu gravar no repositorio remoto; o pacote entregue contem o codigo
-local completo para aplicar e revisar no IntelliJ.
+[DEPLOY_NUVEM.md](DEPLOY_NUVEM.md). O codigo, os dados preparados e as paginas devem ser mantidos juntos no
+repositorio para que todos os integrantes executem a mesma versao.
 
 ## Regras dos 40 exercicios diarios
 

@@ -241,8 +241,9 @@ para conectar um MySQL remoto, importar os dados e configurar o acesso do grupo.
 
 O [plano de importação das provas](doc/PLANO_IMPORTACAO_PROVAS.md) organiza as
 quatro categorias e o contrato comum para os integrantes. Os scripts incluem
-metadados de edição, caderno e fonte oficial; a seleção de várias provas e o
-importador validado ainda precisam ser implementados no aplicativo.
+metadados de edição, caderno e fonte oficial. A importação ETEC e os simulados
+diários já estão implementados; as demais categorias precisam da carga e da
+validação de seus acervos.
 
 ## 📌 Status
 
