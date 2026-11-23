@@ -9,7 +9,7 @@ import java.time.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/simulados-diarios")
+@RequestMapping({"/api/simulados-semanais", "/api/simulados-diarios"})
 public class SimuladoDiarioController {
     private final SimuladoDiarioRepository repository;
     private final Clock clock;
@@ -27,7 +27,8 @@ public class SimuladoDiarioController {
         if (!"simulado".equals(header)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Requisicao invalida.");
     }
     @GetMapping("/acervo") public Map<String, Object> acervo() { return repository.acervo(); }
-    @PostMapping("/hoje") public Map<String, Object> hoje(HttpSession session, @RequestHeader(value="X-Evolua-Request", required=false) String header) {
+    // As rotas antigas tambem obedecem ao intervalo semanal.
+    @PostMapping({"/atual", "/hoje"}) public Map<String, Object> hoje(HttpSession session, @RequestHeader(value="X-Evolua-Request", required=false) String header) {
         int id = estudante(session); origem(header); return repository.iniciar(id, LocalDate.now(clock));
     }
     @GetMapping("/historico") public List<Map<String, Object>> historico(HttpSession session) { return repository.historico(estudante(session)); }

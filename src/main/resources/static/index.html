@@ -371,7 +371,7 @@
 
         <div class="card">
 
-            <h2>Desempenho nos simulados diários</h2>
+            <h2>Desempenho nos simulados semanais</h2>
 
             <p>
                 Acertos nos últimos 30 simulados concluídos:
@@ -489,9 +489,9 @@
         <!-- SIMULADO -->
 
         <div class="card simulado-card" id="simulado">
-            <h2>Simulado diário ETEC</h2>
-            <p>40 questões mescladas de edições oficiais, com histórico individual e respostas salvas.</p>
-            <a class="botao-principal" href="/simulados.html" style="display:inline-block;text-decoration:none">Abrir simulado diário →</a>
+            <h2>Simulado semanal ETEC</h2>
+            <p>40 questões por semana, mescladas de edições oficiais, com histórico individual e respostas salvas.</p>
+            <a class="botao-principal" href="/simulados.html" style="display:inline-block;text-decoration:none">Abrir simulado semanal →</a>
         </div>
 
     </div>
@@ -1047,7 +1047,7 @@
 
     async function carregarDesempenho() {
         try {
-            const response = await fetch('/api/simulados-diarios/historico');
+            const response = await fetch('/api/simulados-semanais/historico');
             if (response.status === 401) { window.location.replace('/login.html'); return; }
             if (!response.ok) throw new Error('Falha ao carregar histórico');
             const concluidos = (await response.json()).filter(s => s.concluido);
@@ -1066,7 +1066,7 @@
        INICIALIZAÇÃO
     ========================= */
 
-    // O simulado diario esta em /simulados.html; evita carregar a antiga Prova 1.
+    // O simulado semanal esta em /simulados.html; evita carregar a antiga Prova 1.
 
     carregarDesempenho();
 
