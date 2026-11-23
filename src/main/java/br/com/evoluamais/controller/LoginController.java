@@ -4,6 +4,8 @@ import br.com.evoluamais.model.Estudante;
 import br.com.evoluamais.repository.EstudanteRepository;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +24,8 @@ public class LoginController {
     @PostMapping
     public Map<String, Object> login(
             @RequestParam String email,
-            @RequestParam String senha) {
+            @RequestParam String senha,
+            HttpServletRequest request) {
 
         Estudante estudante =
                 estudanteRepository.fazerLogin(
@@ -44,6 +47,10 @@ public class LoginController {
             return resposta;
         }
 
+        HttpSession session = request.getSession();
+        request.changeSessionId();
+        session.setAttribute("idEstudante", estudante.getIdEstudante());
+        session.setAttribute("nomeEstudante", estudante.getUsuario().getNome());
         resposta.put("sucesso", true);
         resposta.put(
                 "idEstudante",
@@ -61,5 +68,12 @@ public class LoginController {
         );
 
         return resposta;
+    }
+
+    @PostMapping("/sair")
+    public Map<String, Boolean> sair(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) session.invalidate();
+        return Map.of("sucesso", true);
     }
 }

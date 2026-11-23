@@ -4,6 +4,7 @@ import br.com.evoluamais.model.Estudante;
 import br.com.evoluamais.repository.EstudanteRepository;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,8 @@ public class CadastroController {
     public Map<String, Object> cadastrar(
             @RequestParam String nome,
             @RequestParam String email,
-            @RequestParam String senha) {
+            @RequestParam String senha,
+            HttpServletRequest request) {
 
         Map<String, Object> resposta = new HashMap<>();
 
@@ -38,8 +40,13 @@ public class CadastroController {
             return resposta;
         }
 
-        // Por enquanto novos estudantes utilizam a Prova 1
-        int idProva = 1;
+        // A prova inicial atende a FK legada; a selecao diaria mistura o acervo ETEC.
+        Integer idProva = estudanteRepository.provaInicial();
+        if (idProva == null) {
+            resposta.put("sucesso", false);
+            resposta.put("mensagem", "O acervo ainda nao esta disponivel. Tente novamente mais tarde.");
+            return resposta;
+        }
 
         Estudante estudante =
                 estudanteRepository.cadastrar(
@@ -60,6 +67,10 @@ public class CadastroController {
             return resposta;
         }
 
+        var session = request.getSession();
+        request.changeSessionId();
+        session.setAttribute("idEstudante", estudante.getIdEstudante());
+        session.setAttribute("nomeEstudante", estudante.getUsuario().getNome());
         resposta.put("sucesso", true);
         resposta.put(
                 "mensagem",

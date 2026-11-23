@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: evoluamais-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /usuarios/teste
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USUARIO
+        sync: false
+      - key: DB_SENHA
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false

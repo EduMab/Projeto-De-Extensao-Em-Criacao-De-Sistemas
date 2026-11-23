@@ -1,0 +1,621 @@
+{
+  "database": "evoluamais",
+  "data": "2026-11-23",
+  "edicoes": 16,
+  "questoes": 790,
+  "anuladas": 3,
+  "ativas": 787,
+  "alternativas": 3950,
+  "segundaImportacaoNovas": 0,
+  "execucoes": [
+    {
+      "edition": "2017-1",
+      "deployment": "88cf3b00-0114-4745-a265-577b426431d4",
+      "first": [
+        {
+          "edicao": "2017-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2017-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 1,
+          "questoes": 50,
+          "anuladas": "0",
+          "ativas": "50"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 250,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2017-2",
+      "deployment": "ba5a4f52-7950-4391-a405-f97c7969e70b",
+      "first": [
+        {
+          "edicao": "2017-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 2
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2017-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 2
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 2,
+          "questoes": 100,
+          "anuladas": "2",
+          "ativas": "98"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 500,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2018-1",
+      "deployment": "27c7d112-6ef9-4677-bcea-6578593456b8",
+      "first": [
+        {
+          "edicao": "2018-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2018-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 3,
+          "questoes": 150,
+          "anuladas": "2",
+          "ativas": "148"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 750,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2018-2",
+      "deployment": "859a1116-792c-45a0-b66b-3410da093ed8",
+      "first": [
+        {
+          "edicao": "2018-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2018-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 4,
+          "questoes": 200,
+          "anuladas": "2",
+          "ativas": "198"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 1000,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2019-1",
+      "deployment": "a2643de3-14f2-4e96-b90a-4524795d4acc",
+      "first": [
+        {
+          "edicao": "2019-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2019-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 5,
+          "questoes": 250,
+          "anuladas": "2",
+          "ativas": "248"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 1250,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2019-2",
+      "deployment": "3ebb4b59-62f9-4e48-95cd-bb98b95851c5",
+      "first": [
+        {
+          "edicao": "2019-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2019-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 6,
+          "questoes": 300,
+          "anuladas": "2",
+          "ativas": "298"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 1500,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2020-1",
+      "deployment": "2d6418d3-6b10-4e61-91b1-411ff477ecde",
+      "first": [
+        {
+          "edicao": "2020-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 1
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2020-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 1
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 7,
+          "questoes": 350,
+          "anuladas": "3",
+          "ativas": "347"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 1750,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2022-2",
+      "deployment": "b806fab4-d0cf-4624-ac7d-4aec277438d0",
+      "first": [
+        {
+          "edicao": "2022-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2022-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 8,
+          "questoes": 400,
+          "anuladas": "3",
+          "ativas": "397"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 2000,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2023-1",
+      "deployment": "59d2c504-e831-41ae-8510-1a7f41177ed2",
+      "first": [
+        {
+          "edicao": "2023-1",
+          "total": 40,
+          "novas": 40,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2023-1",
+          "total": 40,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 9,
+          "questoes": 440,
+          "anuladas": "3",
+          "ativas": "437"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 2200,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2023-2",
+      "deployment": "b9eaab5b-7a66-41d0-8a9f-3019f137effd",
+      "first": [
+        {
+          "edicao": "2023-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2023-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 10,
+          "questoes": 490,
+          "anuladas": "3",
+          "ativas": "487"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 2450,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2024-1",
+      "deployment": "02f773d0-ad74-4ef5-ad23-9e2db8a81a32",
+      "first": [
+        {
+          "edicao": "2024-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2024-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 11,
+          "questoes": 540,
+          "anuladas": "3",
+          "ativas": "537"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 2700,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2024-2",
+      "deployment": "3e783310-aac3-4dfa-ac8f-213294df188c",
+      "first": [
+        {
+          "edicao": "2024-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2024-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 12,
+          "questoes": 590,
+          "anuladas": "3",
+          "ativas": "587"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 2950,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2025-1",
+      "deployment": "dd6ff75e-d053-4255-bb7c-a67a04f560ab",
+      "first": [
+        {
+          "edicao": "2025-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2025-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 13,
+          "questoes": 640,
+          "anuladas": "3",
+          "ativas": "637"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 3200,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2025-2",
+      "deployment": "fc576057-eaba-44f7-8b0b-565f986371ea",
+      "first": [
+        {
+          "edicao": "2025-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2025-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 14,
+          "questoes": 690,
+          "anuladas": "3",
+          "ativas": "687"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 3450,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2026-1",
+      "deployment": "1ccf10a8-9b47-4b83-9979-b3069890380c",
+      "first": [
+        {
+          "edicao": "2026-1",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2026-1",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 15,
+          "questoes": 740,
+          "anuladas": "3",
+          "ativas": "737"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 3700,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    },
+    {
+      "edition": "2026-2",
+      "deployment": "7d8d8983-d3af-461f-97ea-8c0350da11be",
+      "first": [
+        {
+          "edicao": "2026-2",
+          "total": 50,
+          "novas": 50,
+          "anuladas": 0
+        }
+      ],
+      "second": [
+        {
+          "edicao": "2026-2",
+          "total": 50,
+          "novas": 0,
+          "anuladas": 0
+        }
+      ],
+      "summary": [
+        {
+          "tipo": "ETEC",
+          "edicoes": 16,
+          "questoes": 790,
+          "anuladas": "3",
+          "ativas": "787"
+        }
+      ],
+      "counts": [
+        {
+          "alternativas": 3950,
+          "estudantes": 0,
+          "simulados": 0
+        }
+      ]
+    }
+  ],
+  "verificacaoMySQL": {
+    "level": "info",
+    "status": "OK",
+    "verificacao": "SQL-MySQL-simulados-diarios",
+    "conta": "evolua_app",
+    "candidatas": 787,
+    "edicoesMisturadas": 16,
+    "questoes": 40,
+    "historicoPreservado": true,
+    "restricaoDiaria": true,
+    "notaVerificada": true,
+    "rollbackVerificado": true,
+    "before": [
+      {
+        "estudantes": 0,
+        "simulados": 0
+      }
+    ],
+    "after": [
+      {
+        "estudantes": 0,
+        "simulados": 0
+      }
+    ],
+    "summary": [
+      {
+        "edicoes": 16,
+        "total": 790,
+        "anuladas": "3",
+        "ativas": "787"
+      }
+    ]
+  }
+}
