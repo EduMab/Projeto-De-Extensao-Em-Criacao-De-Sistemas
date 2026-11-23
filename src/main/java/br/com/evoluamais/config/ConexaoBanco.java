@@ -6,9 +6,6 @@ import java.sql.SQLException;
 
 public class ConexaoBanco {
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/evoluamais";
-
     private static final String USUARIO =
             System.getenv("DB_USUARIO");
 
@@ -17,14 +14,20 @@ public class ConexaoBanco {
 
     public static Connection conectar() throws SQLException {
 
-        if (USUARIO == null || SENHA == null) {
+        String url = System.getenv("DB_URL");
+
+        if (url == null || url.isBlank()) {
+            url = "jdbc:mysql://localhost:3306/evoluamais";
+        }
+
+        if (USUARIO == null || USUARIO.isBlank() || SENHA == null) {
             throw new SQLException(
                     "Variáveis DB_USUARIO e DB_SENHA não configuradas."
             );
         }
 
         return DriverManager.getConnection(
-                URL,
+                url,
                 USUARIO,
                 SENHA
         );

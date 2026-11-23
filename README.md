@@ -18,6 +18,12 @@ O MVP foi concentrado em três funcionalidades principais:
 
 O sistema também possui funcionalidades de apoio, como cadastro, login e identificação do estudante.
 
+A etapa atual adiciona [simulados diários ETEC](doc/ETEC_E_SIMULADOS.md): 40
+questões mescladas por estudante/dia, prioridade para inéditas, retomada das
+respostas e correção ao concluir. O acervo oficial de 2017 a 2026 reúne 16
+edições, 790 questões e 787 válidas. As 3 anuladas ficam fora da seleção.
+A nova interface fica em `/simulados.html`.
+
 ## 🤖 Inteligência Artificial
 
 A Inteligência Artificial é utilizada para analisar o desempenho do estudante após a realização do simulado.
@@ -53,7 +59,7 @@ A resposta gerada contém recomendações personalizadas de estudo e é armazena
 
 O banco de dados utilizado pelo projeto é o MySQL.
 
-O MVP possui 9 entidades/tabelas principais:
+O MVP original possui 9 entidades/tabelas principais:
 
 1. Usuario
 2. Estudante
@@ -64,6 +70,9 @@ O MVP possui 9 entidades/tabelas principais:
 7. Resposta
 8. Desempenho
 9. RecomendacaoIA
+
+O fluxo diário acrescenta `simulado_diario` e `simulado_diario_questao`, totalizando
+11 tabelas. O MER abaixo ainda representa a versão original.
 
 Essas entidades representam o núcleo necessário para o funcionamento do simulado, armazenamento das respostas, cálculo de desempenho e integração com Inteligência Artificial.
 
@@ -179,9 +188,15 @@ Para executar o projeto, devem ser configuradas as seguintes variáveis de ambie
 
 ```text
 OPENROUTER_API_KEY
+DB_URL
 DB_USUARIO
 DB_SENHA
 ```
+
+`DB_URL` é opcional no desenvolvimento local; sem ela, a aplicação utiliza
+`jdbc:mysql://localhost:3306/evoluamais`. Para um banco remoto, configure a URL
+JDBC fornecida pela hospedagem. O arquivo `.env.example` documenta as variáveis,
+mas não é carregado automaticamente pela aplicação.
 
 As senhas dos usuários são armazenadas utilizando hash BCrypt.
 
@@ -217,6 +232,18 @@ Para executar o projeto:
 4. Instale/carregue as dependências Maven.
 5. Execute a classe `EvoluaMaisApplication`.
 6. Acesse a aplicação pelo navegador.
+
+## ☁️ Publicação na nuvem
+
+O projeto inclui um Dockerfile para Java 25, configuração do Render Free e
+scripts SQL baseados no MER. Consulte o [guia de publicação](doc/DEPLOY_NUVEM.md)
+para conectar um MySQL remoto, importar os dados e configurar o acesso do grupo.
+
+O [plano de importação das provas](doc/PLANO_IMPORTACAO_PROVAS.md) organiza as
+quatro categorias e o contrato comum para os integrantes. Os scripts incluem
+metadados de edição, caderno e fonte oficial. A importação ETEC e os simulados
+diários já estão implementados; as demais categorias precisam da carga e da
+validação de seus acervos.
 
 ## 📌 Status
 

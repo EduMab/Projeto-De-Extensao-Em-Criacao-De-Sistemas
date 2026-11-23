@@ -13,6 +13,15 @@ import java.sql.Statement;
 
 public class EstudanteRepository {
 
+    public Integer provaInicial() {
+        String sql = "SELECT id_prova FROM prova WHERE tipo='ETEC' AND status_importacao='VALIDADA' ORDER BY ano DESC,semestre DESC,id_prova DESC LIMIT 1";
+        try (var c = ConexaoBanco.conectar(); var s = c.prepareStatement(sql); var r = s.executeQuery()) {
+            return r.next() ? r.getInt(1) : null;
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
     private final SenhaService senhaService;
 
     public EstudanteRepository() {

@@ -41,6 +41,7 @@ build/
 ### Secrets / Environment ###
 .env
 .env.*
+!.env.example
 *.env
 
 ### IntelliJ local settings ###
@@ -53,3 +54,6 @@ build/
 logs/
 
 .idea/
+tmp/pdfs/
+__pycache__/
+*.py[cod]

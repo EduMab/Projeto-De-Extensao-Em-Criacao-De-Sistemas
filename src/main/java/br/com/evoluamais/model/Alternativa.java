@@ -34,6 +34,7 @@ public class Alternativa {
         this.texto = texto;
     }
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isCorreta() {
         return correta;
     }
