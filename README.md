@@ -18,11 +18,13 @@ O MVP foi concentrado em três funcionalidades principais:
 
 O sistema também possui funcionalidades de apoio, como cadastro, login e identificação do estudante.
 
-A etapa atual adiciona [simulados diários ETEC](doc/ETEC_E_SIMULADOS.md): 40
-questões mescladas por estudante/dia, prioridade para inéditas, retomada das
+A etapa atual adiciona [simulados semanais ETEC](doc/ETEC_E_SIMULADOS.md): 40
+questões mescladas por estudante, com uma nova seleção a cada sete dias, prioridade para inéditas, retomada das
 respostas e correção ao concluir. O acervo oficial de 2017 a 2026 reúne 16
 edições, 790 questões e 787 válidas. As 3 anuladas ficam fora da seleção.
-A nova interface fica em `/simulados.html`.
+A interface fica em `/simulados.html`. Ao abrir novamente dentro dos sete dias,
+o estudante retoma as mesmas questões e respostas. A próxima liberação ocorre
+na data de abertura mais sete dias, às 00h de Brasília.
 
 ## 🤖 Inteligência Artificial
 
@@ -71,8 +73,10 @@ O MVP original possui 9 entidades/tabelas principais:
 8. Desempenho
 9. RecomendacaoIA
 
-O fluxo diário acrescenta `simulado_diario` e `simulado_diario_questao`, totalizando
-11 tabelas. O MER abaixo ainda representa a versão original.
+O fluxo semanal utiliza `simulado_diario` e `simulado_diario_questao`, totalizando
+11 tabelas. Os nomes internos dessas duas tabelas foram preservados para manter
+o histórico existente; a frequência é semanal e não exige migração SQL.
+O MER abaixo ainda representa a versão original.
 
 Essas entidades representam o núcleo necessário para o funcionamento do simulado, armazenamento das respostas, cálculo de desempenho e integração com Inteligência Artificial.
 
@@ -242,7 +246,7 @@ para conectar um MySQL remoto, importar os dados e configurar o acesso do grupo.
 O [plano de importação das provas](doc/PLANO_IMPORTACAO_PROVAS.md) organiza as
 quatro categorias e o contrato comum para os integrantes. Os scripts incluem
 metadados de edição, caderno e fonte oficial. A importação ETEC e os simulados
-diários já estão implementados; as demais categorias precisam da carga e da
+semanais já estão implementados; as demais categorias precisam da carga e da
 validação de seus acervos.
 
 ## 📌 Status

@@ -40,7 +40,7 @@ public class CadastroController {
             return resposta;
         }
 
-        // A prova inicial atende a FK legada; a selecao diaria mistura o acervo ETEC.
+        // A prova inicial atende a FK legada; a selecao semanal mistura o acervo ETEC.
         Integer idProva = estudanteRepository.provaInicial();
         if (idProva == null) {
             resposta.put("sucesso", false);

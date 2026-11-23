@@ -35,20 +35,73 @@ class SimuladoDiarioRepositoryTest {
     @SuppressWarnings("unchecked") private List<JsonNode> questoes(Map<String,Object> simulado) { return (List<JsonNode>)simulado.get("questoes"); }
     private Set<Integer> ids(Map<String,Object> simulado) { var ids=new HashSet<Integer>();questoes(simulado).forEach(q->ids.add(q.get("idQuestao").asInt()));return ids; }
 
-    @Test void mesclaEdicoesRetomaDiaEUsaIneditasAntesDeRepetir() {
-        var um=repo.iniciar(1,hoje);var retomado=repo.iniciar(1,hoje);var dois=repo.iniciar(1,hoje.plusDays(1));var tres=repo.iniciar(1,hoje.plusDays(2));
+    @Test void mesclaEdicoesRetomaSemanaEUsaIneditasAntesDeRepetir() {
+        var um=repo.iniciar(1,hoje);var retomado=repo.iniciar(1,hoje.plusDays(6));var dois=repo.iniciar(1,hoje.plusWeeks(1));var tres=repo.iniciar(1,hoje.plusWeeks(2));
+        assertEquals(7,um.get("intervaloDias"));assertEquals("2026-11-30",um.get("proximaLiberacao"));
         assertEquals(40,ids(um).size());assertEquals(um,retomado);assertTrue(Collections.disjoint(ids(um),ids(dois)));assertEquals(ids(um),ids(tres));
         assertEquals(4,questoes(um).stream().map(q->q.get("edicao").asText()).distinct().count());
         assertTrue(questoes(um).stream().allMatch(q->!q.has("gabarito")&&!q.has("acertou")));assertFalse(um.containsKey("acertos"));
         assertEquals(3,repo.historico(1).size());assertTrue(repo.historico(2).isEmpty());
     }
     @Test void chamadasSimultaneasRecebemAMesmaSelecao() throws Exception {
+        repo.iniciar(1,hoje.minusWeeks(1));
         try(var executor=Executors.newVirtualThreadPerTaskExecutor()) {
             var gate=new CountDownLatch(1);
             var a=executor.submit(()->{gate.await();return repo.iniciar(1,hoje);});
             var b=executor.submit(()->{gate.await();return repo.iniciar(1,hoje);});gate.countDown();
-            assertEquals(a.get(20,TimeUnit.SECONDS),b.get(20,TimeUnit.SECONDS));assertEquals(1,repo.historico(1).size());
+            assertEquals(a.get(20,TimeUnit.SECONDS),b.get(20,TimeUnit.SECONDS));assertEquals(2,repo.historico(1).size());
         }
+    }
+    @Test void retomaRespostasNosSeisDiasSeguintesEIsolaEstudantes() {
+        var primeira=repo.iniciar(1,hoje);
+        long id=((Number)primeira.get("id")).longValue();
+        int alternativa=questoes(primeira).get(0).get("alternativas").get(1).get("id").asInt();
+        repo.responder(1,id,1,alternativa);
+        var salva=repo.obter(1,id);
+        for(int dias=1;dias<=6;dias++) assertEquals(salva,repo.iniciar(1,hoje.plusDays(dias)));
+        assertEquals(1,salva.get("respondidas"));
+        assertEquals(alternativa,questoes(salva).get(0).get("alternativaSelecionada").asInt());
+        assertEquals(1,repo.historico(1).size());
+        assertNotEquals(id,repo.iniciar(2,hoje.plusDays(1)).get("id"));
+        var proxima=repo.iniciar(1,hoje.plusDays(7));
+        assertNotEquals(id,proxima.get("id"));
+        assertEquals(0,proxima.get("respondidas"));
+        assertEquals(salva,repo.obter(1,id));
+    }
+    @Test void concluirNaoAntecipaLiberacaoSemanal() {
+        var primeira=repo.iniciar(1,hoje);long id=((Number)primeira.get("id")).longValue();
+        for(var q:questoes(primeira)) repo.responder(1,id,q.get("posicao").asInt(),q.get("alternativas").get(0).get("id").asInt());
+        var concluida=repo.finalizar(1,id);
+        for(int dias=0;dias<=6;dias++) assertEquals(concluida,repo.iniciar(1,hoje.plusDays(dias)));
+        assertNotEquals(id,repo.iniciar(1,hoje.plusDays(7)).get("id"));
+        assertEquals(concluida,repo.obter(1,id));
+    }
+    @Test void preservaHistoricoDiarioLegadoERetomaSelecaoMaisRecente() throws Exception {
+        var antiga=repo.iniciar(1,hoje.minusDays(2));long idAntiga=((Number)antiga.get("id")).longValue();
+        long idRecente;
+        try(var c=DriverManager.getConnection(url)) {
+            try(var s=c.prepareStatement("INSERT INTO simulado_diario(id_estudante,tipo,data_simulado) VALUES(1,'ETEC',?)",Statement.RETURN_GENERATED_KEYS)) {
+                s.setDate(1,java.sql.Date.valueOf(hoje.minusDays(1)));s.executeUpdate();
+                try(var r=s.getGeneratedKeys()){assertTrue(r.next());idRecente=r.getLong(1);}
+            }
+            try(var s=c.prepareStatement("INSERT INTO simulado_diario_questao(id_simulado,posicao,id_questao,snapshot_json) SELECT ?,posicao,id_questao,snapshot_json FROM simulado_diario_questao WHERE id_simulado=?")) {
+                s.setLong(1,idRecente);s.setLong(2,idAntiga);s.executeUpdate();
+            }
+        }
+        assertEquals(idRecente,repo.iniciar(1,hoje).get("id"));
+        assertEquals(idRecente,repo.iniciar(1,hoje.plusDays(5)).get("id"));
+        assertEquals(2,repo.historico(1).size());
+        assertEquals(antiga,repo.obter(1,idAntiga));
+        assertNotEquals(idRecente,repo.iniciar(1,hoje.plusDays(6)).get("id"));
+        assertEquals(3,repo.historico(1).size());
+    }
+    @Test void publicaMetadadosSemanaisDoAcervo() {
+        var acervo=repo.acervo();
+        assertEquals(40,acervo.get("questoesPorSimulado"));
+        assertEquals(7,acervo.get("intervaloDias"));
+        assertEquals(2,acervo.get("semanasCom40Ineditas"));
+        assertFalse(acervo.containsKey("questoesPorDia"));
+        assertFalse(acervo.containsKey("diasCom40Ineditas"));
     }
     @Test void verificaDonoAlternativaEConclusaoECalculaNotaComSnapshot() throws Exception {
         var simulado=repo.iniciar(1,hoje);long id=((Number)simulado.get("id")).longValue();var qs=questoes(simulado);

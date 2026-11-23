@@ -22,10 +22,13 @@ class SimuladoDiarioControllerTest {
         var repo=new RepositorioVerificado();
         var controller=new SimuladoDiarioController(repo,Clock.fixed(Instant.parse("2026-11-24T01:00:00Z"),ZoneId.of("America/Sao_Paulo")));
         var mvc=MockMvcBuilders.standaloneSetup(controller).build();var sessao=new MockHttpSession();sessao.setAttribute("idEstudante",7);
-        mvc.perform(post("/api/simulados-diarios/hoje").header("X-Evolua-Request","simulado")).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/simulados-diarios/hoje").session(sessao)).andExpect(status().isForbidden());
-        mvc.perform(post("/api/simulados-diarios/hoje?data=2099-01-01&idEstudante=99").session(sessao).header("X-Evolua-Request","simulado"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(123));
+        for(String rota:new String[]{"/api/simulados-semanais/atual","/api/simulados-diarios/hoje",
+                "/api/simulados-semanais/hoje","/api/simulados-diarios/atual"}) {
+            mvc.perform(post(rota).header("X-Evolua-Request","simulado")).andExpect(status().isUnauthorized());
+            mvc.perform(post(rota).session(sessao)).andExpect(status().isForbidden());
+            mvc.perform(post(rota+"?data=2099-01-01&idEstudante=99").session(sessao).header("X-Evolua-Request","simulado"))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(123));
+        }
         assertEquals(7,repo.estudante);assertEquals(LocalDate.of(2026,11,23),repo.dia);
     }
 }

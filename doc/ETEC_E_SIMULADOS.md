@@ -1,4 +1,4 @@
-# ETEC: acervo oficial e simulados diarios
+# ETEC: acervo oficial e simulados semanais
 
 ## O que esta pronto
 
@@ -55,17 +55,23 @@ Nao coloque senhas ou chaves no GitHub. As configuracoes de deploy estao em
 [DEPLOY_NUVEM.md](DEPLOY_NUVEM.md). O codigo, os dados preparados e as paginas devem ser mantidos juntos no
 repositorio para que todos os integrantes executem a mesma versao.
 
-## Regras dos 40 exercicios diarios
+## Regras dos 40 exercicios semanais
 
-- Uma selecao de 40 questoes por estudante e data, considerando Sao Paulo.
-  Reabrir no mesmo dia retoma a mesma selecao e as respostas salvas.
+- Uma selecao de 40 questoes por estudante a cada sete dias, considerando
+  Sao Paulo. A proxima liberacao ocorre as 00h da data de abertura mais sete
+  dias: abriu em 23/11, a proxima fica disponivel em 30/11. Reabrir nos seis
+  dias seguintes retoma as mesmas questoes e respostas, mesmo se concluido.
+- A contagem parte da abertura, sem antecipacao ao concluir. Semanas sem
+  acesso nao acumulam selecoes. Ao voltar depois do intervalo, a nova abertura
+  inicia o proximo ciclo. Tentativas anteriores continuam acessiveis pelo
+  historico, inclusive para terminar as que ficaram em andamento.
 - Questoes ineditas para aquele estudante tem prioridade. Dentro de cada
   faixa de prioridade, o seletor intercala edicoes e embaralha a ordem.
 - O historico considera as questoes selecionadas, mesmo se o estudante nao
   terminar o simulado. Tambem considera respostas do fluxo antigo.
 - Depois de esgotar as ineditas, entram primeiro as vistas ha mais tempo.
   Nunca ha duas ocorrencias do mesmo ID de questao numa selecao.
-- As 787 questoes rendem 19 selecoes completas sem repetir. A 20a usa as
+- As 787 questoes rendem 19 selecoes semanais completas sem repetir. A 20a usa as
   27 ineditas restantes e 13 das mais antigas. O acervo e finito.
 - Anuladas, provas em rascunho e questoes sem cinco alternativas e um
   gabarito unico nao entram. Se houver menos de 40 validas, a API informa
@@ -76,6 +82,25 @@ repositorio para que todos os integrantes executem a mesma versao.
   alternativas, calcula a nota e libera a correcao somente ao concluir.
 - Apenas o estudante autenticado acessa e responde suas tentativas.
   Requisicoes de criacao/resposta/conclusao usam `X-Evolua-Request: simulado`.
+
+## Compatibilidade com o banco e a versao anterior
+
+Esta alteracao nao exige SQL nem nova importacao. Os nomes internos
+`SimuladoDiarioRepository`, `SimuladoDiarioController`, `SeletorQuestoesDiarias`,
+`simulado_diario` e `simulado_diario_questao` foram preservados. A regra de sete
+dias e aplicada pelo servidor dentro da mesma transacao e trava por estudante.
+
+A interface usa `/api/simulados-semanais/atual`. As rotas antigas de
+`/api/simulados-diarios`, incluindo `/hoje`, continuam funcionando com a mesma
+regra semanal. As respostas incluem `intervaloDias=7` e `proximaLiberacao`,
+calculada a partir da data de abertura daquela tentativa. Ao consultar uma
+entrada antiga no historico, essa data pertence aquela selecao, nao a uma
+selecao mais recente. O acervo informa `questoesPorSimulado` e
+`semanasCom40Ineditas` no lugar dos antigos contadores diarios.
+
+Se houver varias tentativas diarias antigas no intervalo, a abertura semanal
+retoma a mais recente. Todas as outras continuam no historico com suas
+respostas e notas preservadas.
 
 ## Formato de apresentacao e limites
 
@@ -92,10 +117,10 @@ versao nao afirma ter separado cada alternativa ou imagem em texto estruturado.
 Nao foi atribuida disciplina ou dificuldade por suposicao: o acervo usa
 `Conhecimentos gerais`, e a revisao pedagogica individual fica para o grupo.
 
-O painel calcula o desempenho dos ultimos 30 simulados diarios registrados e
+O painel calcula o desempenho dos ultimos 30 simulados semanais registrados e
 concluidos. A integracao da IA com esse novo historico ainda esta pendente;
 as rotas antigas de IA continuam relacionadas ao fluxo anterior do MVP.
-A selecao diaria desta versao contempla ETEC. ENEM, FUVEST e concursos serao
+A selecao semanal desta versao contempla ETEC. ENEM, FUVEST e concursos serao
 adicionados depois da carga e da validacao de cada categoria.
 
 ## Reproduzir a coleta e a importacao
@@ -138,10 +163,10 @@ oficiais ou alteracoes do grupo silenciosamente.
 | --- | --- |
 | PDFs e gabaritos | 16 edicoes; numeracao completa; gabaritos sem conflitos; 3 anuladas |
 | Importacao MySQL no Railway | 790 questoes, 3.950 alternativas; 787 ativas; segunda execucao sem duplicatas |
-| Conta real da API no MySQL | Selecao de 40 entre 16 edicoes; JSON das paginas; historico; nota; restricao diaria |
+| Conta real da API no MySQL (validacao anterior) | Selecao de 40 entre 16 edicoes; JSON das paginas; historico; nota; versao diaria original |
 | Registros temporarios da verificacao | Rollback confirmado; zero estudantes/tentativas temporarios remanescentes |
-| Java/JUnit | 7 testes: prioridade, esgotamento, concorrencia, retomada, propriedade das respostas, nota e fuso horario |
-| JavaScript/DOM | Navegacao, resposta salva, retomada, falha de salvamento, conclusao e correcao |
+| Java/JUnit da versao semanal | 11 testes aprovados: sete dias, retomada, conclusao sem antecipar liberacao, concorrencia, historico legado, ineditas, sessao e fuso horario |
+| JavaScript/DOM da versao semanal | Textos e rota semanais, data da proxima selecao, navegacao, resposta salva, retomada, falha de salvamento, conclusao e correcao |
 | Revisao visual da nova tela em navegador | Pendente: o navegador deste ambiente nao iniciou; conferir localmente |
 
 A conexao TCP externa deste ambiente de execucao nao alcancou o MySQL.
@@ -149,6 +174,9 @@ Por isso o SQL foi conferido dentro do Railway com a conta `evolua_app`,
 e os testes Java foram executados localmente com H2 em modo de compatibilidade
 MySQL. Isso nao equivale a um teste completo da tela Java contra o MySQL remoto.
 O Workbench do responsavel ja havia conectado ao mesmo endpoint com TLS.
+A nova janela semanal foi testada com H2; o teste completo da API semanal
+contra o MySQL remoto fica para a publicacao e nao foi realizado nesta alteracao.
+O relatorio desta etapa esta em `acervo/etec/validacao-semanal.json`.
 
 ## Conferir no Workbench
 

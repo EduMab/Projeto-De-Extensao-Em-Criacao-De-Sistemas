@@ -4,7 +4,7 @@ let simulado = null, indice = 0, ocupado = false;
 function element(tag, text, className) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
 function aviso(text) { $("mensagem").textContent = text; $("mensagem").hidden = !text; }
 async function api(path, method = "GET", data) {
-  const response = await fetch("/api/simulados-diarios" + path, { method, credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Evolua-Request": "simulado" }, body: data === undefined ? undefined : JSON.stringify(data) });
+  const response = await fetch("/api/simulados-semanais" + path, { method, credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Evolua-Request": "simulado" }, body: data === undefined ? undefined : JSON.stringify(data) });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) { const error = new Error(response.status === 401 ? "Entre na sua conta para acessar seus simulados." : body.message || "Não foi possível concluir. Tente novamente."); error.status = response.status; throw error; }
   return body;
@@ -30,6 +30,8 @@ function pagina(p, q, container, foco) {
 function mostrar() {
   if (!simulado) return; const q = simulado.questoes[indice];
   $("inicio").hidden = true; $("estudo").hidden = false;
+  $("periodo").hidden = false;
+  $("periodo").textContent = `Seleção aberta em ${formatDate(simulado.data)} · Intervalo de sete dias até ${formatDate(simulado.proximaLiberacao)}, no horário de Brasília. Consulte e continue os simulados anteriores pelo histórico.`;
   $("fonte").textContent = q.prova; $("titulo").textContent = `Questão ${indice + 1}`;
   $("posicao").textContent = `${indice + 1} / 40`; $("questaoOriginal").textContent = `Responda a questão ${String(q.numeroOriginal).padStart(2, "0")} da edição ${q.edicao}.`;
   const url = q.conteudo.urlProva; $("provaOriginal").href = url?.startsWith("https://") ? url : "https://www.cps.sp.gov.br/etec/vestibulinho/";
@@ -53,7 +55,7 @@ function resultado() {
   $("resultado").hidden = !simulado?.concluido;
   if (!simulado?.concluido) return;
   const score = element("div", `${simulado.acertos}/40`, "score"), text = element("div");
-  text.append(element("p", "MAIS UM PASSO NA SUA EVOLUÇÃO", "eyebrow"), element("h2", `${simulado.percentual.toFixed(1).replace(".", ",")}% de acertos`), element("p", "Revise as questões abaixo. A próxima seleção diária estará disponível amanhã."));
+  text.append(element("p", "MAIS UM PASSO NA SUA EVOLUÇÃO", "eyebrow"), element("h2", `${simulado.percentual.toFixed(1).replace(".", ",")}% de acertos`), element("p", "Revise as questões abaixo. Sua correção continua disponível no histórico. Uma nova seleção é liberada sete dias após a abertura da anterior."));
   $("resultado").replaceChildren(score, text);
 }
 function formatDate(value) { const [year, month, day] = value.split("-"); return `${day}/${month}/${year}`; }
@@ -63,9 +65,9 @@ async function historico() {
   } catch (error) { if (error.status === 401) { $("historico").replaceChildren(element("a", "Entrar para ver meu histórico")); $("historico").firstChild.href = "/login.html"; } else aviso(error.message); }
 }
 $("comecar").onclick = async () => { if (ocupado) return; ocupado = true; $("comecar").disabled = true; $("comecar").textContent = "Preparando suas questões…"; aviso("");
-  try { simulado = await api("/hoje", "POST"); indice = Math.max(0, simulado.questoes.findIndex(q => q.alternativaSelecionada === null)); resultado(); mostrar(); await historico(); }
+  try { simulado = await api("/atual", "POST"); indice = Math.max(0, simulado.questoes.findIndex(q => q.alternativaSelecionada === null)); resultado(); mostrar(); await historico(); }
   catch (error) { if (error.status === 401) { window.location.href = "/login.html"; return; } aviso(error.message); }
-  finally { ocupado = false; $("comecar").disabled = false; $("comecar").textContent = "Abrir simulado de hoje →"; }
+  finally { ocupado = false; $("comecar").disabled = false; $("comecar").textContent = "Abrir simulado da semana →"; }
 };
 $("anterior").onclick = () => { if (!ocupado && indice > 0) { indice--; mostrar(); } };
 $("proxima").onclick = () => { if (!ocupado && indice < 39) { indice++; mostrar(); } };

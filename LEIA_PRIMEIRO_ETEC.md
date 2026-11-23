@@ -1,7 +1,7 @@
 # Abrir a versao ETEC do Evolua+
 
 O banco compartilhado no Railway ja recebeu 16 edicoes oficiais de 2017 a
-2026: 790 questoes, com 787 utilizaveis. A estrutura dos simulados diarios
+2026: 790 questoes, com 787 utilizaveis. A estrutura dos simulados semanais
 tambem ja esta aplicada nesse banco.
 
 1. Atualize seu clone pelo GitHub/IntelliJ. Se usar o ZIP do repositorio,
@@ -18,7 +18,7 @@ tambem ja esta aplicada nesse banco.
 4. Execute `EvoluaMaisApplication` e abra
    [o login](http://localhost:8080/login.html). Entre novamente ou cadastre
    um estudante para criar a sessao no servidor.
-5. No painel, clique em **Abrir simulado diario**, ou abra
+5. No painel, clique em **Abrir simulado semanal**, ou abra
    [a pagina de simulados](http://localhost:8080/simulados.html).
 
 Mantenha a pasta `src/main/resources/static/questoes/etec` completa: ela
@@ -29,13 +29,21 @@ Use o banco da nuvem ja configurado. Os scripts de criacao, migracao e
 importacao acompanham o projeto para reproducao; essa carga no Railway
 ja foi concluida, sem necessidade de repeti-los.
 
-Cada estudante recebe 40 questoes por dia, mescladas entre edicoes. Reabrir
-o simulado retoma as respostas. Ha 19 dias completos de questoes ineditas;
-na 20a selecao entram 27 ineditas e 13 vistas ha mais tempo.
+Cada estudante recebe 40 questoes por semana, mescladas entre edicoes. Uma
+nova selecao fica disponivel na data de abertura mais sete dias, as 00h de
+Brasilia. Exemplo: abriu em 23/11, a proxima fica disponivel em 30/11.
+Reabrir antes dessa data retoma a mesma selecao e as respostas, mesmo se o
+simulado ja estiver concluido. O historico permite continuar ou consultar
+simulados anteriores. Nao ha acumulo de selecoes durante semanas sem acesso.
 
-O codigo foi compilado com sete testes aprovados. O SQL foi conferido no
-MySQL real, e os fluxos da interface passaram por testes de DOM/JavaScript.
-A revisao visual em navegador fica para a execucao local.
+Ha 19 selecoes semanais completas de questoes ineditas; na 20a entram 27
+ineditas e 13 vistas ha mais tempo. Nao e necessario recriar o banco nem
+importar as provas novamente: os nomes internos das tabelas foram mantidos.
+
+A versao semanal foi compilada com 11 testes aprovados, incluindo retomada
+nos seis dias seguintes, liberacao no setimo dia, concorrencia e preservacao
+de tentativas antigas. Os fluxos da interface passaram por testes de
+DOM/JavaScript. A revisao visual em navegador fica para a execucao local.
 
 Os integrantes compartilham o codigo pelo repositorio GitHub. Atualize o
 clone antes de executar. A API hospedada deve usar esta versao do codigo

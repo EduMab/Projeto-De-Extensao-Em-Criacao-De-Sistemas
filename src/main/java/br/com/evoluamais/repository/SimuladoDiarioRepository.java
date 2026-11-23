@@ -16,6 +16,7 @@ import java.util.*;
 
 @Repository
 public class SimuladoDiarioRepository {
+    private static final int INTERVALO_DIAS = 7;
     @FunctionalInterface public interface Conexoes { Connection abrir() throws SQLException; }
     private final Conexoes conexoes;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -28,7 +29,7 @@ public class SimuladoDiarioRepository {
         return new ResponseStatusException(status, message);
     }
     private static ResponseStatusException indisponivel(Exception cause) {
-        org.slf4j.LoggerFactory.getLogger(SimuladoDiarioRepository.class).error("Falha no banco do simulado diario: {}", cause.getClass().getSimpleName());
+        org.slf4j.LoggerFactory.getLogger(SimuladoDiarioRepository.class).error("Falha no banco do simulado semanal: {}", cause.getClass().getSimpleName());
         return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Nao foi possivel acessar o simulado. Tente novamente.");
     }
     private JsonNode json(String value) throws SQLException {
@@ -49,7 +50,8 @@ public class SimuladoDiarioRepository {
         try (Connection c = conexoes.abrir(); var s = c.prepareStatement(sql); var r = s.executeQuery()) {
             r.next(); int total = r.getInt("total");
             return Map.of("tipo", "ETEC", "questoesAtivas", total, "edicoes", r.getInt("edicoes"),
-                    "questoesPorDia", 40, "diasCom40Ineditas", total / 40, "ineditasRestantes", total % 40);
+                    "questoesPorSimulado", 40, "intervaloDias", INTERVALO_DIAS,
+                    "semanasCom40Ineditas", total / 40, "ineditasRestantes", total % 40);
         } catch (SQLException e) { throw indisponivel(e); }
     }
 
@@ -63,8 +65,16 @@ public class SimuladoDiarioRepository {
                     try (var r = s.executeQuery()) { if (!r.next()) throw erro(HttpStatus.UNAUTHORIZED, "Entre novamente na sua conta."); }
                 }
                 Long existente = null;
-                try (var s = c.prepareStatement("SELECT id_simulado FROM simulado_diario WHERE id_estudante=? AND data_simulado=?")) {
-                    s.setInt(1, estudante); s.setDate(2, java.sql.Date.valueOf(dia));
+                // Mantem as tabelas existentes e retoma a selecao mais recente dos ultimos sete dias.
+                // A trava do estudante tambem protege requisicoes em datas diferentes na virada do dia.
+                try (var s = c.prepareStatement("""
+                        SELECT id_simulado FROM simulado_diario
+                        WHERE id_estudante=? AND tipo='ETEC' AND data_simulado>=? AND data_simulado<=?
+                        ORDER BY data_simulado DESC,id_simulado DESC LIMIT 1
+                        """)) {
+                    s.setInt(1, estudante);
+                    s.setDate(2, java.sql.Date.valueOf(dia.minusDays(INTERVALO_DIAS - 1)));
+                    s.setDate(3, java.sql.Date.valueOf(dia));
                     try (var r = s.executeQuery()) { if (r.next()) existente = r.getLong(1); }
                 }
                 if (existente != null) {
@@ -178,6 +188,8 @@ public class SimuladoDiarioRepository {
         }
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", id); result.put("data", dia); result.put("tipo", "ETEC"); result.put("concluido", concluido);
+        result.put("intervaloDias", INTERVALO_DIAS);
+        result.put("proximaLiberacao", LocalDate.parse(dia).plusDays(INTERVALO_DIAS).toString());
         result.put("respondidas", respondidas); result.put("total", questoes.size()); result.put("questoes", questoes);
         if (concluido) { result.put("acertos", acertos); result.put("percentual", acertos * 100.0 / 40); }
         return result;

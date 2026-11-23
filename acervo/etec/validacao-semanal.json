@@ -1,0 +1,32 @@
+{
+  "status": "OK",
+  "camada": "DOM e JavaScript; sem teste visual em navegador",
+  "questoes": 40,
+  "edicoes": 16,
+  "intervaloDias": 7,
+  "textosSemanais": true,
+  "dataProximaSelecao": true,
+  "retomada": true,
+  "falhaDeSalvamentoPreservaResposta": true,
+  "bloqueioConclusaoIncompleta": true,
+  "correcaoAposConclusao": true,
+  "notaFixture": 6,
+  "chamadasResposta": 41,
+  "data": "2026-11-23",
+  "java": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "regra": "Nova selecao na data de abertura mais sete dias, as 00h de America/Sao_Paulo",
+  "retomadaAteSextoDia": true,
+  "novaSelecaoNoSetimoDia": true,
+  "conclusaoNaoAntecipaLiberacao": true,
+  "concorrencia": true,
+  "historicoLegadoPreservado": true,
+  "rotasAntigasComRegraSemanal": true,
+  "migracaoSQL": "Nao necessaria; tabelas e dados preservados",
+  "testeAPIcomMySQLRemoto": "Pendente nesta alteracao",
+  "navegadorVisual": "Pendente"
+}
