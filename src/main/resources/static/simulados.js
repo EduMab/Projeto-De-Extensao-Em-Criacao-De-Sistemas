@@ -27,6 +27,30 @@ function pagina(p, q, container, foco) {
   if (foco && q.conteudo.caixaTitulo) { const [x, y, x2, y2] = q.conteudo.caixaTitulo; const marker = element("span", undefined, "focus-marker"); marker.style.left = `${Math.max(0, (x - 7) / q.conteudo.larguraPagina * 100)}%`; marker.style.top = `${Math.max(0, (y - 5) / q.conteudo.alturaPagina * 100)}%`; marker.style.width = `${Math.max(100, x2 - x + 30) / q.conteudo.larguraPagina * 100}%`; marker.style.height = `${(y2 - y + 10) / q.conteudo.alturaPagina * 100}%`; stage.append(marker); }
   scroll.append(stage); container.append(label, scroll);
 }
+function recortesOriginais(q, container) {
+  const fragments = q.conteudo.recortes;
+  if (!Array.isArray(fragments) || !fragments.length || !fragments.some(r => r.tipo === "questao")) {
+    container.append(element("p", "Recorte indisponível. Abra o caderno oficial para consultar a questão.", "page-error"));
+    return;
+  }
+  const scroll = element("div", undefined, "crop-scroll");
+  for (const fragment of fragments) {
+    if (!/^\/questoes\/concursos\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "")
+        || !["apoio", "questao"].includes(fragment.tipo)) continue;
+    const card = element("section", undefined, "question-crop-card");
+    if (Number.isFinite(fragment.larguraOriginal) && fragment.larguraOriginal > 0) {
+      card.style.setProperty("--crop-width", `${Math.min(650, Math.max(400, fragment.larguraOriginal * 1.3))}px`);
+    }
+    if (Number($("zoom").value) > 100) card.style.maxWidth = "none";
+    card.append(element("p", fragment.tipo === "apoio" ? "TEXTO DE APOIO" : "QUESTÃO", "crop-heading"));
+    const img = element("img"); img.src = fragment.imagem;
+    img.alt = `${fragment.tipo === "apoio" ? "Texto de apoio da questão" : "Enunciado e alternativas da questão"} ${q.numeroOriginal}, ${q.prova}.`;
+    img.loading = "lazy";
+    img.onerror = () => { img.hidden = true; card.append(element("p", "Imagem indisponível. Consulte o caderno oficial.", "page-error")); };
+    card.append(img); scroll.append(card);
+  }
+  container.append(scroll);
+}
 function mostrar() {
   if (!simulado) return; const q = simulado.questoes[indice];
   $("inicio").hidden = true; $("estudo").hidden = false;
@@ -39,6 +63,12 @@ function mostrar() {
   (q.conteudo.paginas || []).forEach(p => pagina(p, q, $("paginas"), p.numero === q.conteudo.pagina));
   (q.conteudo.apoioAnterior || []).forEach(p => pagina(p, q, $("paginasApoio"), false));
   $("apoio").hidden = !q.conteudo.apoioAnterior?.length;
+  const recortada = q.conteudo.modo === "recorte_original";
+  $("estudo").classList.toggle("cropped-question", recortada);
+  $("notaOriginal").textContent = recortada
+    ? "Somente a questão atual aparece abaixo. Quando necessário, o texto de apoio é exibido antes do enunciado."
+    : "As páginas originais preservam textos, gráficos e fórmulas. Responda somente a questão indicada, mesmo que outras apareçam na página.";
+  if (recortada) recortesOriginais(q, $("paginas"));
   if (q.conteudo.modo === "pdf_original") {
     const texto = element("p", q.enunciado, "question-text"); texto.style.whiteSpace = "pre-wrap";
     $("paginas").append(texto);
@@ -52,7 +82,7 @@ function mostrar() {
   $("opcoes").replaceChildren();
   q.alternativas.forEach(a => { const label = element("label", undefined, "option"), input = element("input"), text = element("span", q.conteudo.modo === "pdf_original" ? `${a.letra}) ${a.texto}` : a.letra); input.type = "radio"; input.name = "alternativa"; input.value = a.id; input.checked = q.alternativaSelecionada === a.id; input.setAttribute("aria-label", `Alternativa ${a.letra}`); input.onchange = () => salvar(q, a.id); label.append(input, text); $("opcoes").append(label); });
   $("correcao").hidden = !simulado.concluido;
-  if (simulado.concluido) $("correcao").textContent = `${q.acertou ? "Você acertou." : "Você errou."} Gabarito oficial: alternativa ${q.gabarito}.`;
+  if (simulado.concluido) $("correcao").textContent = `${q.acertou ? "Você acertou." : "Você errou."} ${q.conteudo.gabaritoPreliminar ? "Gabarito preliminar da fonte" : "Gabarito oficial"}: alternativa ${q.gabarito}.`;
   $("finalizar").hidden = simulado.concluido; progresso(); bloquear(false);
 }
 async function salvar(q, alternativa) {
@@ -81,7 +111,7 @@ $("comecar").onclick = async () => { if (ocupado) return; ocupado = true; $("com
 };
 $("anterior").onclick = () => { if (!ocupado && indice > 0) { indice--; mostrar(); } };
 $("proxima").onclick = () => { if (!ocupado && indice < 39) { indice++; mostrar(); } };
-$("zoom").oninput = event => $("estudo").style.setProperty("--zoom", `${event.target.value}%`);
+$("zoom").oninput = event => { $("estudo").style.setProperty("--zoom", `${event.target.value}%`); $("estudo").style.setProperty("--crop-scale", Number(event.target.value) / 100); document.querySelectorAll(".question-crop-card").forEach(card => card.style.maxWidth = Number(event.target.value) > 100 ? "none" : ""); };
 $("finalizar").onclick = async () => { if (ocupado) return; const respondidas = simulado.questoes.filter(q => q.alternativaSelecionada !== null).length;
   if (respondidas < 40) { aviso(`Faltam ${40 - respondidas} questões. Responda todas antes de finalizar.`); return; }
   bloquear(true); aviso(""); try { simulado = await api(`/${simulado.id}/finalizar`, "POST"); resultado(); mostrar(); await historico(); $("resultado").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (error) { aviso(error.message); } finally { bloquear(false); }

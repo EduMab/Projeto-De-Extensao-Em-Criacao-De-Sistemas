@@ -1,0 +1,77 @@
+{
+  "status": "PREPARADO",
+  "provas": [
+    {
+      "codigo": "PCI-AEDECCA-2010",
+      "questoes": 40,
+      "anuladas": [],
+      "provaSha256": "2ee7d5e97c75a5ba3587ce8e28195ec959b4a459a15b134af8841b912a61080a",
+      "gabaritoSha256": "571eef9a2d76ebaf92b0bfa990335d59490a2ce350149ea6318d22e2b2b01352"
+    },
+    {
+      "codigo": "PCI-OLEGARIO-2011",
+      "questoes": 20,
+      "anuladas": [],
+      "provaSha256": "4f3c128dde846b80ed3d2e87e22201dfcc9f5e568dbee20ae06658fcf76e77f9",
+      "gabaritoSha256": "76add1efec9941c5d1a885f2c01ce1ad086a700c43a95bcf82f5be36612aabea"
+    },
+    {
+      "codigo": "PCI-RIO-SERRA-2010",
+      "questoes": 50,
+      "anuladas": [],
+      "provaSha256": "55b96bb89a4ef9a93c209527d7384fae404e0d44281d028fdba8779ad5ec817d",
+      "gabaritoSha256": "cdf94cc3fd906ad14e3210e9b7c62d05d7d1157c892398c39d0859133d6c28ff"
+    },
+    {
+      "codigo": "PCI-MATO-GROSSO-2010",
+      "questoes": 32,
+      "anuladas": [],
+      "provaSha256": "b6a32295dc0793ab450f354e1e9b5b232245f0216fe94913bd08c63a9b531dce",
+      "gabaritoSha256": "11c65248ff134e2e437cc5b055df203b1b10bf4f37a97293ca704cdb4af5b3eb"
+    },
+    {
+      "codigo": "PCI-MONTES-CLAROS-2010",
+      "questoes": 30,
+      "anuladas": [],
+      "provaSha256": "4b700ad92c76667835fe101ff1a3ca7c79e0281f6f9827f0ffc4c74abac5faee",
+      "gabaritoSha256": "04779a81c6db14e14662af777e9aefff53975286ae332b8c358f031dbe257851"
+    },
+    {
+      "codigo": "PCI-SANTA-CRUZ-2010",
+      "questoes": 40,
+      "anuladas": [],
+      "provaSha256": "26bae901388e68c5a3b1d7c5dbbb14f261862c0bfa2f2a0b08d2e1770cc0cd17",
+      "gabaritoSha256": "6ae742cc82a6cfa8e77cd2228f625e42610b78703bb8d81c630cb6d3951d5092"
+    },
+    {
+      "codigo": "PCI-SAO-FRANCISCO-2010",
+      "questoes": 32,
+      "anuladas": [],
+      "provaSha256": "622d25ba766d86803dc5513a9e694545b527b27fd7dbaac83218b0406e228184",
+      "gabaritoSha256": "999c46896ba0d44f137a90a7df7180b407a5e38b2bac4ad67ca4cef77ee6d2be"
+    },
+    {
+      "codigo": "PCI-PRIMAVERA-2009",
+      "questoes": 40,
+      "anuladas": [
+        18
+      ],
+      "provaSha256": "9d2714364c68aaf8611a9cf48c26a7af5c4440ec079ae4f7f8ba30d0d7da49b8",
+      "gabaritoSha256": "ea5d8c27ee5799972367e706dc4bad5809b1758da218888c5af92a6ca97af3ee"
+    },
+    {
+      "codigo": "PCI-PAPAGAIOS-2009",
+      "questoes": 40,
+      "anuladas": [],
+      "provaSha256": "36d619b361944a6e07a6da2ef571192e9f2d6e6e7279cd93764faea0d3747553",
+      "gabaritoSha256": "246649c2e69da05e900cbbd8262c8cc70871289b67c6883e342a0938e4f7fdf0"
+    },
+    {
+      "codigo": "PCI-CASSERENGUE-2009",
+      "questoes": 40,
+      "anuladas": [],
+      "provaSha256": "5db5769a37dbd34a942c9bc26282cd803ae21912f118cc7239a25c52ef284e15",
+      "gabaritoSha256": "3ac0573a0a8939d8e2bd0780b6f58fb263f29e2c0da98e9fb1ee0978e7ecfd52"
+    }
+  ]
+}

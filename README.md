@@ -273,7 +273,10 @@ A proposta busca utilizar tecnologia para apoiar estudantes no processo de prepa
 
 ## Concursos de nível médio
 
-A importação inclui dez cadernos, 830 questões e 2.990 alternativas; 30 questões
-anuladas ficam fora dos simulados. A categoria Concurso tem seleção semanal
-própria de 40 questões e aceita certo/errado, A–D e A–E.
-Consulte [fontes, execução e validação](database/README_IMPORTACAO_CONCURSOS.md).
+O catálogo preparado usa dez provas do PCI Concursos, com 364 questões e uma
+anulada fora da seleção. Os simulados mantêm 40 questões por semana, alternativas
+A–D ou A–E e salvamento de respostas. A tela mostra somente o recorte da questão
+atual, incluindo o apoio necessário, em proporção original e com controle de zoom.
+
+Consulte [fontes, recortes e substituição do catálogo](acervo/concursos/README_RECORTES.md).
+A carga anterior permanece arquivada para auditoria e para consulta de históricos.
