@@ -58,6 +58,8 @@ A resposta gerada contém recomendações personalizadas de estudo e é armazena
 - CSS
 - JavaScript
 - OpenRouter API
+- Web Push API, Service Worker e VAPID
+- PWA (manifesto para instalação em dispositivos compatíveis)
 - IntelliJ IDEA
 - Git
 - GitHub
