@@ -156,6 +156,8 @@ public class NotificacaoRepository {
             FROM notificacao n
             JOIN push_subscription p ON p.id_estudante=n.id_estudante
             WHERE n.push_enviada_em IS NULL
+              AND n.criada_em >= p.criada_em
+              AND n.criada_em >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY)
             ORDER BY n.id_notificacao, p.id_assinatura
             LIMIT 500
             """;
