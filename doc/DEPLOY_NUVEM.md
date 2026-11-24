@@ -3,6 +3,37 @@
 Esta configuracao prepara o MVP para uma API no Render e um banco MySQL no
 Railway. O codigo continua no GitHub, compartilhado entre os integrantes.
 
+## Configuracao da entrega atual
+
+- Site: [Entrar no Evolua+](https://evoluamais-api.onrender.com/login.html).
+- API: `https://evoluamais-api.onrender.com`; as telas e a API usam o mesmo dominio.
+- Render: `evoluamais-api`, Docker, branch `main`, plano Free, regiao Virginia.
+- Health check: `/usuarios/teste`.
+- Banco compartilhado: `evoluamais` no Railway, ja com 16 edicoes ETEC,
+  790 questoes importadas e 787 validas. Nao repita a criacao ou a importacao.
+- Usuario da API: `evolua_app`. A senha fica somente nas variaveis de ambiente.
+- Os simulados liberam 40 questoes a cada sete dias. O historico permite retomar
+  respostas e consultar a correcao de tentativas concluidas.
+
+As rotas antigas `/ia/**`, `/respostas/**` e `/simulado/**` passam a exigir
+sessao e acesso ao proprio estudante, como o fluxo semanal. IDs de outra conta
+sao recusados, inclusive quando enviados em parametros duplicados ou junto de
+outro ID no caminho. Cadastro, login, telas e health check continuam publicos.
+A compilacao local desta preparacao passou em 17 testes, incluindo seis de
+controle de acesso das rotas legadas.
+
+A integracao da IA com o historico semanal permanece pendente. Sem
+`OPENROUTER_API_KEY` configurada no Render, o cadastro, login e simulado
+funcionam, mas a recomendacao da IA nao e gerada.
+
+A instancia Free pode levar cerca de um minuto para despertar apos ficar sem
+acessos. O Railway tambem tem cota gratuita: acompanhe o saldo para a avaliacao.
+Nenhum plano pago e necessario para a configuracao desta entrega.
+
+O roteiro abaixo fica como referencia para reproduzir a publicacao. Em novas
+alteracoes na branch `main`, confira se o Render iniciou um deploy; se nao,
+use **Manual Deploy > Deploy latest commit** no servico existente.
+
 ## 1. Preparar o codigo no GitHub
 
 Envie as alteracoes em uma branch e abra um pull request para o grupo revisar.

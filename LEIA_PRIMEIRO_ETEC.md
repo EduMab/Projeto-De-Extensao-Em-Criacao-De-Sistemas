@@ -1,5 +1,9 @@
 # Abrir a versao ETEC do Evolua+
 
+Acesso pela internet: [Entrar no Evolua+](https://evoluamais-api.onrender.com/login.html).
+O site e a API sao servidos pelo Render Free e usam o MySQL compartilhado no Railway.
+As instrucoes abaixo servem para executar uma copia local no IntelliJ.
+
 O banco compartilhado no Railway ja recebeu 16 edicoes oficiais de 2017 a
 2026: 790 questoes, com 787 utilizaveis. A estrutura dos simulados semanais
 tambem ja esta aplicada nesse banco.
@@ -46,7 +50,8 @@ de tentativas antigas. Os fluxos da interface passaram por testes de
 DOM/JavaScript. A revisao visual em navegador fica para a execucao local.
 
 Os integrantes compartilham o codigo pelo repositorio GitHub. Atualize o
-clone antes de executar. A API hospedada deve usar esta versao do codigo
-para disponibilizar a nova interface; o banco da nuvem ja esta atualizado.
+clone antes de executar. A API hospedada deve acompanhar a branch `main`.
+Depois de atualizar o codigo, confira o deploy no Render; se necessario, use
+**Manual Deploy > Deploy latest commit**. O banco da nuvem ja esta atualizado.
 
 Detalhes e fontes: [ETEC e simulados](doc/ETEC_E_SIMULADOS.md).
