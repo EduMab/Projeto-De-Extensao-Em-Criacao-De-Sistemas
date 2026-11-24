@@ -5,13 +5,13 @@ import br.com.evoluamais.repository.PushSubscriptionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
-import org.apache.http.HttpResponse;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.Security;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -65,8 +65,8 @@ public class EntregaPushService {
                         "title",entrega.titulo(),"body",entrega.mensagem(),
                         "url",entrega.link(),"tag","evolua-notificacao-"+entrega.idNotificacao()));
                     Notification notification=new Notification(entrega.endpoint(),entrega.p256dh(),
-                        entrega.auth(),payload,3600);
-                    HttpResponse response=pushService.send(notification);
+                        entrega.auth(),payload.getBytes(StandardCharsets.UTF_8),3600);
+                    var response=pushService.send(notification);
                     int status=response.getStatusLine().getStatusCode();
                     if(status>=200&&status<300) sucesso=true;
                     else if(status==404||status==410) assinaturas.removerEndpoint(entrega.endpoint());
