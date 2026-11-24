@@ -11,22 +11,25 @@ import java.time.ZoneId;
 
 @Component
 public class NotificacaoSemanalAgendador {
-    private static final Logger log = LoggerFactory.getLogger(NotificacaoSemanalAgendador.class);
-    private static final ZoneId FUSO = ZoneId.of("America/Sao_Paulo");
+    private static final Logger log=LoggerFactory.getLogger(NotificacaoSemanalAgendador.class);
+    private static final ZoneId FUSO=ZoneId.of("America/Sao_Paulo");
     private final NotificacaoRepository repository;
+    private final EntregaPushService push;
 
-    public NotificacaoSemanalAgendador(NotificacaoRepository repository) {
-        this.repository = repository;
+    public NotificacaoSemanalAgendador(NotificacaoRepository repository, EntregaPushService push) {
+        this.repository=repository; this.push=push;
     }
 
-    /** Verifica diariamente às 9h se há tarefa nova ou simulado pendente. */
-    @Scheduled(cron = "0 0 9 * * *", zone = "America/Sao_Paulo")
+    /** Roda diariamente as 9h: cria avisos do ciclo semanal e tenta entrega push. */
+    @Scheduled(cron="0 0 9 * * *",zone="America/Sao_Paulo")
     public void verificarTarefas() {
         try {
-            int total = repository.gerarPendentes(LocalDate.now(FUSO));
-            if (total > 0) log.info("Notificações semanais criadas: {}", total);
-        } catch (Exception e) {
-            log.error("Falha ao verificar notificações semanais.", e);
+            int criadas=repository.gerarPendentes(LocalDate.now(FUSO));
+            int enviadas=push.enviarPendentes();
+            if(criadas>0||enviadas>0)
+                log.info("Notificacoes semanais: {} criadas; {} enviadas por push.",criadas,enviadas);
+        } catch(Exception e) {
+            log.error("Falha ao processar notificacoes semanais.",e);
         }
     }
 }
