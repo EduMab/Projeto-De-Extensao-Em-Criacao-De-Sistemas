@@ -294,6 +294,11 @@ async function iniciar() {
     perfil = await requisicao("/api/perfil");
     renderizar();
     carregarNotificacoes();
+    if (window.location.hash === "#notificacoes") {
+      $("centralNotificacoes").hidden = false;
+      $("abrirNotificacoes").setAttribute("aria-expanded", "true");
+      prepararPush();
+    }
   } catch (error) { erro(error.message); $("tentarNovamente").hidden = false; }
   finally { $("carregamento").hidden = true; }
 }
