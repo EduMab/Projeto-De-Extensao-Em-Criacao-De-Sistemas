@@ -31,7 +31,7 @@ def fetch(url: str) -> bytes:
 
 def norm(value: str) -> str:
     value = value.casefold().replace("º", "o").replace("°", "o")
-    return re.sub(r"\\s+", " ", value).strip()
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def page_links(year: int) -> dict:
@@ -47,13 +47,13 @@ def page_links(year: int) -> dict:
             text = norm(parent.get_text(" ", strip=True))
             if len(text) > 1600:
                 continue
-            day = re.search(r"([12])o?\\s*dia", text)
+            day = re.search(r"([12])o?\s*dia", text)
             if day and "azul" in text and "aplica" in text:
                 context = text
                 break
         if not context or "reaplica" in context or "ppl" in context:
             continue
-        day_match = re.search(r"([12])o?\\s*dia", context)
+        day_match = re.search(r"([12])o?\s*dia", context)
         day = int(day_match.group(1))
         # Na aplicacao regular, o caderno azul e o 1 no primeiro dia
         # e o 7 no segundo. A descricao do bloco tambem precisa confirmar azul.
