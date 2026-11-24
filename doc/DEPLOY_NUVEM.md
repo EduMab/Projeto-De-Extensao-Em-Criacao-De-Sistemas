@@ -5,6 +5,33 @@ Railway. O codigo continua no GitHub, compartilhado entre os integrantes.
 
 ## Configuracao da entrega atual
 
+### Escolha de objetivo no primeiro acesso
+
+Antes de publicar esta versao em um banco ja existente, aplicar **uma vez**
+`database/05_objetivo_estudante.sql`. A migracao apenas acrescenta a coluna
+nullable `estudante.objetivo_prova`; nao atualiza contas existentes e preserva
+as provas, questoes, respostas e simulados. Em instalacoes novas, a coluna ja
+esta em `01_estrutura.sql`.
+
+No primeiro login apos a atualizacao, cada aluno escolhe ETEC, ENEM, Concurso
+publico ou FUVEST. A escolha fica na conta e vale em outros dispositivos.
+Os quatro botoes do painel permitem trocar de objetivo; o historico anterior
+permanece salvo. ENEM, Concurso e FUVEST podem ser selecionados, mas mostram
+conteudo em preparacao: o motor de simulados desta entrega continua sendo ETEC.
+Importar novas provas nao ativa automaticamente o motor de outra categoria.
+
+`GET /api/perfil` e `PUT /api/perfil/objetivo` exigem sessao. A alteracao usa
+JSON `{"objetivo":"ETEC"}` e o header `X-Evolua-Request: perfil`; o estudante
+vem da sessao, nunca de um ID informado pelo navegador. A criacao de simulados
+exige o objetivo ETEC salvo, incluindo os aliases antigos. Trocar de objetivo
+e voltar nao antecipa os sete dias nem recria a tentativa.
+
+Validacao local desta versao: 23 testes Java aprovados e sintaxe JavaScript
+conferida. Aplique a migracao antes do deploy e valide a escolha, a troca e a
+persistencia apos novo login na API publicada.
+
+### Hospedagem
+
 - Site: [Entrar no Evolua+](https://evoluamais-api.onrender.com/login.html).
 - API: `https://evoluamais-api.onrender.com`; as telas e a API usam o mesmo dominio.
 - Render: `evoluamais-api`, Docker, branch `main`, plano Free, regiao Virginia.
@@ -19,7 +46,7 @@ As rotas antigas `/ia/**`, `/respostas/**` e `/simulado/**` passam a exigir
 sessao e acesso ao proprio estudante, como o fluxo semanal. IDs de outra conta
 sao recusados, inclusive quando enviados em parametros duplicados ou junto de
 outro ID no caminho. Cadastro, login, telas e health check continuam publicos.
-A compilacao local desta preparacao passou em 17 testes, incluindo seis de
+A compilacao local desta preparacao passou em 23 testes, incluindo seis de
 controle de acesso das rotas legadas.
 
 A integracao da IA com o historico semanal permanece pendente. Sem

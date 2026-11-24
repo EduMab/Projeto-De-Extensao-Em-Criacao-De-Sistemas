@@ -77,5 +77,19 @@ $("finalizar").onclick = async () => { if (ocupado) return; const respondidas = 
   bloquear(true); aviso(""); try { simulado = await api(`/${simulado.id}/finalizar`, "POST"); resultado(); mostrar(); await historico(); $("resultado").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (error) { aviso(error.message); } finally { bloquear(false); }
 };
 $("sair").onclick = async () => { await fetch("/login/sair", { method: "POST", credentials: "same-origin" }); localStorage.clear(); window.location.href = "/login.html"; };
-api("/acervo").then(data => { $("acervoTotal").textContent = data.questoesAtivas; $("acervoEdicoes").textContent = data.edicoes; }).catch(error => aviso(error.message));
-historico();
+async function inicializar() {
+  $("comecar").disabled = true;
+  try {
+    const response = await fetch("/api/perfil", { credentials: "same-origin", cache: "no-store" });
+    if (response.status === 401) { window.location.replace("/login.html"); return; }
+    if (!response.ok) throw new Error("Não foi possível carregar seu objetivo. Atualize a página para tentar novamente.");
+    const perfil = await response.json();
+    if (perfil.objetivo !== "ETEC") { window.location.replace("/index.html"); return; }
+    $("comecar").disabled = false;
+    await Promise.allSettled([
+      api("/acervo").then(data => { $("acervoTotal").textContent = data.questoesAtivas; $("acervoEdicoes").textContent = data.edicoes; }).catch(error => aviso(error.message)),
+      historico()
+    ]);
+  } catch (error) { aviso(error.message); }
+}
+inicializar();
