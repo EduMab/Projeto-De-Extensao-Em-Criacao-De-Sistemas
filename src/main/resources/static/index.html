@@ -10,8 +10,9 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/index.html" aria-label="Evolua+, meu painel">EVOLUA<span>+</span></a>
-    <div class="user"><span>Olá, <strong id="nomeUsuario">estudante</strong>!</span><button id="sair" class="quiet" type="button">Sair</button></div>
+    <div class="user"><span>Olá, <strong id="nomeUsuario">estudante</strong>!</span><button id="abrirNotificacoes" class="notification-trigger" type="button" aria-expanded="false" aria-controls="centralNotificacoes">🔔 <span>Notificações</span><b id="contadorNotificacoes" hidden>0</b></button><button id="sair" class="quiet" type="button">Sair</button></div>
   </header>
+  <section id="centralNotificacoes" class="notification-center" hidden aria-label="Central de notificações"><div class="notification-heading"><strong>Suas notificações</strong><button id="marcarTodasNotificacoes" type="button">Marcar todas como lidas</button></div><div id="listaNotificacoes"><p class="muted">Carregando…</p></div></section>
   <main class="container">
     <p id="carregamento" class="loading" role="status">Preparando seu espaço de estudos…</p>
     <div id="erro" class="notice error" role="alert" hidden></div>
