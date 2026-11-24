@@ -69,3 +69,10 @@ preservando os dados. Em instalação nova, `01_estrutura.sql` já contém o ín
 
 Validação local: 24 testes Java e quatro verificações do acervo aprovados;
 sintaxe JavaScript conferida. O workflow verifica também Java 25 e MySQL 8.0.
+
+## Execução confirmada
+
+Em 24/11/2026, a rotina PreparacaoBanco concluiu a carga no MySQL evoluamais:
+10 provas validadas, 830 questões, 2.990 alternativas, 30 anuladas e 800 válidas.
+O índice por categoria foi aplicado. As 16 provas ETEC e 790 questões foram
+preservadas. O comprovante está em `acervo/concursos/comprovante-questoes-nuvem.json`.

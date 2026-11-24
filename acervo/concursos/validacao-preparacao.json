@@ -1,20 +1,7 @@
 {
-  "status": "PREPARADO_AGUARDANDO_APROVACAO",
-  "questoes": 830,
-  "alternativas": 2990,
-  "anuladas": 30,
-  "validas": 800,
-  "commitAcervo": "34fdcd3aa2f5ce6185184dab05e69b4da2c3da7c",
-  "sha256": "6e57b2d1fe9e2f82d9397d973f1d43dd64e5427e7f01696acc9c1880c67534c1",
+  "status": "EXECUTADO",
   "testesJava": 24,
   "testesAcervo": 4,
-  "ci": "https://github.com/EduMab/Projeto-De-Extensao-Em-Criacao-De-Sistemas/actions/runs/45438722607",
-  "railway": {
-    "projeto": "17289eb2-f99d-4bef-a828-3baab021fc4e",
-    "ambiente": "c94f6079-c405-4327-9aeb-7a3ea8a6bf10",
-    "servico": "f9b5cdac-8c1d-4779-ac45-4a2a4fde9904",
-    "patch": "5179e966-a019-4673-b1ea-62574c50ffd3",
-    "alteracoesPendentes": 1
-  },
-  "observacao": "A revisão automática bloqueou a execução direta em produção; fonte preparada em staging, sem importar as questões ou alterar o índice."
+  "ci": "https://github.com/EduMab/Projeto-De-Extensao-Em-Criacao-De-Sistemas/actions/runs/45439328760",
+  "comprovante": "acervo/concursos/comprovante-questoes-nuvem.json"
 }
