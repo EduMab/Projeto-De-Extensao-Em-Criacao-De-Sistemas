@@ -3,6 +3,7 @@ FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src ./src
+COPY acervo ./acervo
 RUN mvn -B -ntp clean package
 
 FROM eclipse-temurin:25-jre

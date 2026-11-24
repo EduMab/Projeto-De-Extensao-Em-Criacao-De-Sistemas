@@ -13,6 +13,7 @@ on:
       - 'src/**'
       - 'acervo/concursos/**'
       - 'pom.xml'
+      - 'Dockerfile'
       - 'database/01_estrutura.sql'
       - 'database/06_importacao_10_concursos_ensino_medio.sql'
       - '.github/workflows/importar-concursos.yml'
@@ -53,6 +54,8 @@ jobs:
           java-version: '25'
           cache: maven
       - run: mvn -B test
+      - name: Validar imagem usada no deploy
+        run: docker build --tag evoluamais-concursos:test .
       - run: python -m unittest discover -s scripts -p test_acervo_concursos.py -v
       - run: python -m unittest discover -s scripts -p test_recortes_concursos.py -v
       - name: Validar carga, reexecução e reversão no MySQL de teste
