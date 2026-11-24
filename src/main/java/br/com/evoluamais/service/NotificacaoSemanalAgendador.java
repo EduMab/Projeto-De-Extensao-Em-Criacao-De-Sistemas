@@ -4,6 +4,8 @@ import br.com.evoluamais.repository.NotificacaoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -19,6 +21,10 @@ public class NotificacaoSemanalAgendador {
     public NotificacaoSemanalAgendador(NotificacaoRepository repository, EntregaPushService push) {
         this.repository=repository; this.push=push;
     }
+
+    /** Faz uma verificacao assim que a aplicacao fica pronta, util apos reinicios do host. */
+    @EventListener(ApplicationReadyEvent.class)
+    public void verificarAoIniciar() { verificarTarefas(); }
 
     /** Roda diariamente as 9h: cria avisos do ciclo semanal e tenta entrega push. */
     @Scheduled(cron="0 0 9 * * *",zone="America/Sao_Paulo")
