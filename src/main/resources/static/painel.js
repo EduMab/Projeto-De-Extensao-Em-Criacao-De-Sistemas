@@ -246,11 +246,16 @@ async function prepararPush() {
           userVisibleOnly:true,
           applicationServerKey:chavePushParaBytes(config.chavePublica)
         });
-        await requisicao("/api/notificacoes/push/assinatura", {
-          method:"POST",
-          headers:{"Content-Type":"application/json","X-Evolua-Request":"notificacoes"},
-          body:JSON.stringify(nova.toJSON())
-        });
+        try {
+          await requisicao("/api/notificacoes/push/assinatura", {
+            method:"POST",
+            headers:{"Content-Type":"application/json","X-Evolua-Request":"notificacoes"},
+            body:JSON.stringify(nova.toJSON())
+          });
+        } catch (erro) {
+          await nova.unsubscribe();
+          throw erro;
+        }
         estado.textContent = "Pronto! Este dispositivo receberá os lembretes do Evolua+.";
         botao.textContent = "Desativar avisos";
       } catch (e) {
