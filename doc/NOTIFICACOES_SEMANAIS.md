@@ -6,7 +6,7 @@ As notificações fazem parte da experiência de acompanhamento do Evolua+. Elas
 
 ## Regras da tarefa semanal
 
-O agendador verifica diariamente às 9h, no fuso `America/Sao_Paulo`:
+O agendador faz uma verificação assim que a aplicação inicia e, depois, diariamente às 9h, no fuso `America/Sao_Paulo`:
 - **Primeiro acesso:** se o estudante tem objetivo com simulado disponível e ainda não iniciou uma seleção, cria um aviso para começar a etapa semanal de 40 questões.
 - **Lembrete:** após três dias da abertura, se o simulado ainda não foi concluído, cria um lembrete único para retomar de onde parou.
 - **Nova etapa:** sete dias após a data de abertura, cria um aviso para a nova seleção semanal, independentemente de o simulado anterior ter sido concluído (regra compatível com o intervalo de liberação do módulo de simulados).
@@ -43,7 +43,7 @@ Cadastre as três variáveis de ambiente no servidor (Render ou outro host):
 
 A chave pública é entregue ao navegador por `GET /api/notificacoes/push/config`; a privada permanece somente no servidor. Não coloque nenhuma dessas chaves em arquivos versionados.
 
-A aplicação precisa estar publicada em HTTPS. O navegador precisa suportar Service Worker e Push API. Alguns dispositivos móveis exigem que o site seja instalado/adicionado à tela inicial para receber Web Push.
+O projeto inclui um manifesto PWA (`manifest.webmanifest`) e ícone vetorial para facilitar a instalação em dispositivos compatíveis. A aplicação precisa estar publicada em HTTPS. O navegador precisa suportar Service Worker e Push API. Alguns dispositivos móveis exigem que o site seja instalado/adicionado à tela inicial para receber Web Push.
 
 ## Rotas autenticadas
 
