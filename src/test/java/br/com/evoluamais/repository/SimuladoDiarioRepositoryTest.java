@@ -17,8 +17,8 @@ class SimuladoDiarioRepositoryTest {
         url = "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=MySQL;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=15000";
         repo = new SimuladoDiarioRepository(() -> DriverManager.getConnection(url));
         try (var c = DriverManager.getConnection(url); var s = c.createStatement()) {
-            s.execute("CREATE TABLE estudante(id_estudante INT PRIMARY KEY)");
-            s.execute("INSERT INTO estudante VALUES(1),(2)");
+            s.execute("CREATE TABLE estudante(id_estudante INT PRIMARY KEY,objetivo_prova VARCHAR(20))");
+            s.execute("INSERT INTO estudante VALUES(1,'ETEC'),(2,'ETEC')");
             s.execute("CREATE TABLE prova(id_prova INT PRIMARY KEY,nome VARCHAR(100),codigo VARCHAR(160),edicao VARCHAR(80),tipo VARCHAR(20),status_importacao VARCHAR(20))");
             s.execute("CREATE TABLE questao(id_questao INT PRIMARY KEY,id_prova INT,numero_original INT,enunciado CLOB,anulada INT,conteudo_json CLOB)");
             s.execute("CREATE TABLE alternativa(id_alternativa INT PRIMARY KEY,id_questao INT,letra CHAR(1),texto VARCHAR(100),correta INT)");
@@ -102,6 +102,20 @@ class SimuladoDiarioRepositoryTest {
         assertEquals(2,acervo.get("semanasCom40Ineditas"));
         assertFalse(acervo.containsKey("questoesPorDia"));
         assertFalse(acervo.containsKey("diasCom40Ineditas"));
+    }
+    @Test void exigeObjetivoETECETrocarNaoApagaNemAntecipaSimulado() throws Exception {
+        var primeiro = repo.iniciar(1,hoje);
+        long id = ((Number)primeiro.get("id")).longValue();
+        for (String objetivo : new String[]{null,"ENEM","CONCURSO","FUVEST"}) {
+            try (var c=DriverManager.getConnection(url);var s=c.prepareStatement("UPDATE estudante SET objetivo_prova=? WHERE id_estudante=1")) {
+                s.setString(1,objetivo);s.executeUpdate();
+            }
+            assertEquals(409,assertThrows(ResponseStatusException.class,()->repo.iniciar(1,hoje)).getStatusCode().value());
+            assertEquals(1,repo.historico(1).size());
+            assertEquals(primeiro,repo.obter(1,id));
+        }
+        try(var c=DriverManager.getConnection(url);var s=c.createStatement()){s.execute("UPDATE estudante SET objetivo_prova='ETEC' WHERE id_estudante=1");}
+        assertEquals(primeiro,repo.iniciar(1,hoje.plusDays(6)));
     }
     @Test void verificaDonoAlternativaEConclusaoECalculaNotaComSnapshot() throws Exception {
         var simulado=repo.iniciar(1,hoje);long id=((Number)simulado.get("id")).longValue();var qs=questoes(simulado);

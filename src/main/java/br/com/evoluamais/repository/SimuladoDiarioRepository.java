@@ -60,9 +60,15 @@ public class SimuladoDiarioRepository {
             c.setAutoCommit(false);
             try {
                 // Uma trava por estudante evita duas requisicoes criarem selecoes diferentes.
-                try (var s = c.prepareStatement("SELECT id_estudante FROM estudante WHERE id_estudante=? FOR UPDATE")) {
+                try (var s = c.prepareStatement("SELECT id_estudante,objetivo_prova FROM estudante WHERE id_estudante=? FOR UPDATE")) {
                     s.setInt(1, estudante);
-                    try (var r = s.executeQuery()) { if (!r.next()) throw erro(HttpStatus.UNAUTHORIZED, "Entre novamente na sua conta."); }
+                    try (var r = s.executeQuery()) {
+                        if (!r.next()) throw erro(HttpStatus.UNAUTHORIZED, "Entre novamente na sua conta.");
+                        String objetivo = r.getString("objetivo_prova");
+                        if (objetivo == null) throw erro(HttpStatus.CONFLICT, "Escolha seu objetivo no painel antes de abrir um simulado.");
+                        if (!"ETEC".equals(objetivo)) throw erro(HttpStatus.CONFLICT,
+                                "Os simulados do seu objetivo estão em preparação. Para praticar ETEC, selecione ETEC no painel.");
+                    }
                 }
                 Long existente = null;
                 // Mantem as tabelas existentes e retoma a selecao mais recente dos ultimos sete dias.
@@ -249,7 +255,7 @@ public class SimuladoDiarioRepository {
             SELECT s.id_simulado,s.data_simulado,s.concluido_em,COUNT(q.id_questao) total,
               COUNT(q.id_alternativa) respondidas,COALESCE(SUM(q.acertou),0) acertos
             FROM simulado_diario s LEFT JOIN simulado_diario_questao q ON q.id_simulado=s.id_simulado
-            WHERE s.id_estudante=? GROUP BY s.id_simulado,s.data_simulado,s.concluido_em
+            WHERE s.id_estudante=? AND s.tipo='ETEC' GROUP BY s.id_simulado,s.data_simulado,s.concluido_em
             ORDER BY s.data_simulado DESC LIMIT 30
             """;
         try (Connection c = conexoes.abrir(); var s = c.prepareStatement(sql)) {
