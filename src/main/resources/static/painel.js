@@ -66,7 +66,7 @@ function renderizar() {
     : "Seus resultados aparecerão aqui quando os simulados desta categoria estiverem disponíveis.";
   ["percentual", "totalRespostas", "acertos", "erros"].forEach(id => $(id).textContent = "—");
   $("situacaoDesempenho").textContent = atual.simuladoDisponivel ? "Carregando seu histórico…" : "Seu histórico de outros objetivos continua preservado.";
-  const ia = atual.simuladoDisponivel && perfil.iaDisponivel;
+  const ia = perfil.objetivo === "ETEC" && perfil.iaDisponivel;
   $("disciplina").disabled = !ia;
   $("gerarRecomendacao").disabled = !ia;
   $("gerarRecomendacao").textContent = ia ? "Gerar recomendação" : "Em preparação";
@@ -78,13 +78,13 @@ async function carregarDados(rodada) {
   await Promise.allSettled([
     requisicao("/api/simulados-semanais/historico").then(rows => {
       if (rodada !== versao) return;
-      const concluidos = rows.filter(s => s.concluido);
+      const concluidos = rows.filter(s => s.concluido && (s.tipo || "ETEC") === perfil.objetivo);
       const total = concluidos.length * 40, acertos = concluidos.reduce((s, item) => s + item.acertos, 0);
       $("percentual").textContent = (total ? acertos / total * 100 : 0).toFixed(1).replace(".", ",");
       $("totalRespostas").textContent = total; $("acertos").textContent = acertos; $("erros").textContent = total - acertos;
       $("situacaoDesempenho").textContent = concluidos.length ? "Cada simulado concluído conta para sua evolução." : "Conclua seu primeiro simulado para começar seu histórico.";
     }).catch(() => { if (rodada === versao) $("situacaoDesempenho").textContent = "Não foi possível carregar seu histórico. Atualize a página para tentar novamente."; }),
-    requisicao("/api/simulados-semanais/acervo").then(data => {
+    requisicao("/api/simulados-semanais/acervo?tipo=" + encodeURIComponent(perfil.objetivo)).then(data => {
       if (rodada !== versao) return;
       $("acervoQuestoes").textContent = data.questoesAtivas; $("acervoEdicoes").textContent = data.edicoes;
     }).catch(() => { if (rodada === versao) $("numerosAcervo").hidden = true; })

@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS simulado_diario (
     data_simulado DATE NOT NULL,
     criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     concluido_em DATETIME DEFAULT NULL,
-    UNIQUE KEY uq_simulado_estudante_dia (id_estudante, data_simulado),
+    UNIQUE KEY uq_simulado_estudante_tipo_dia (id_estudante, tipo, data_simulado),
     CONSTRAINT fk_simulado_estudante FOREIGN KEY (id_estudante) REFERENCES estudante(id_estudante)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -1,6 +1,6 @@
 "use strict";
 const $ = id => document.getElementById(id);
-let simulado = null, indice = 0, ocupado = false;
+let simulado = null, indice = 0, ocupado = false, objetivo = "ETEC";
 function element(tag, text, className) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
 function aviso(text) { $("mensagem").textContent = text; $("mensagem").hidden = !text; }
 async function api(path, method = "GET", data) {
@@ -34,13 +34,23 @@ function mostrar() {
   $("periodo").textContent = `Seleção aberta em ${formatDate(simulado.data)} · Intervalo de sete dias até ${formatDate(simulado.proximaLiberacao)}, no horário de Brasília. Consulte e continue os simulados anteriores pelo histórico.`;
   $("fonte").textContent = q.prova; $("titulo").textContent = `Questão ${indice + 1}`;
   $("posicao").textContent = `${indice + 1} / 40`; $("questaoOriginal").textContent = `Responda a questão ${String(q.numeroOriginal).padStart(2, "0")} da edição ${q.edicao}.`;
-  const url = q.conteudo.urlProva; $("provaOriginal").href = url?.startsWith("https://") ? url : "https://www.cps.sp.gov.br/etec/vestibulinho/";
+  const url = q.conteudo.pdf || q.conteudo.urlProva; $("provaOriginal").href = (url?.startsWith("https://") || url?.startsWith("/questoes/concursos/")) ? url : "https://www.cps.sp.gov.br/etec/vestibulinho/";
   $("paginas").replaceChildren(); $("paginasApoio").replaceChildren(); $("apoio").open = false;
   (q.conteudo.paginas || []).forEach(p => pagina(p, q, $("paginas"), p.numero === q.conteudo.pagina));
   (q.conteudo.apoioAnterior || []).forEach(p => pagina(p, q, $("paginasApoio"), false));
   $("apoio").hidden = !q.conteudo.apoioAnterior?.length;
+  if (q.conteudo.modo === "pdf_original") {
+    const texto = element("p", q.enunciado, "question-text"); texto.style.whiteSpace = "pre-wrap";
+    $("paginas").append(texto);
+    const pdf = q.conteudo.pdf;
+    if (/^\/questoes\/concursos\/[a-z0-9-]+\/prova\.pdf#page=\d+$/.test(pdf || "")) {
+      $("paginas").append(element("p", `Caderno completo: consulte a questão ${q.numeroOriginal} na página ${q.conteudo.pagina}. Textos de apoio podem começar nas páginas anteriores.`, "page-label"));
+      const frame = element("iframe"); frame.src = pdf; frame.title = `Caderno ${q.prova}`; frame.style.width = "100%"; frame.style.height = "650px";
+      $("paginas").append(frame);
+    }
+  }
   $("opcoes").replaceChildren();
-  q.alternativas.forEach(a => { const label = element("label", undefined, "option"), input = element("input"), text = element("span", a.letra); input.type = "radio"; input.name = "alternativa"; input.value = a.id; input.checked = q.alternativaSelecionada === a.id; input.setAttribute("aria-label", `Alternativa ${a.letra}`); input.onchange = () => salvar(q, a.id); label.append(input, text); $("opcoes").append(label); });
+  q.alternativas.forEach(a => { const label = element("label", undefined, "option"), input = element("input"), text = element("span", q.conteudo.modo === "pdf_original" ? `${a.letra}) ${a.texto}` : a.letra); input.type = "radio"; input.name = "alternativa"; input.value = a.id; input.checked = q.alternativaSelecionada === a.id; input.setAttribute("aria-label", `Alternativa ${a.letra}`); input.onchange = () => salvar(q, a.id); label.append(input, text); $("opcoes").append(label); });
   $("correcao").hidden = !simulado.concluido;
   if (simulado.concluido) $("correcao").textContent = `${q.acertou ? "Você acertou." : "Você errou."} Gabarito oficial: alternativa ${q.gabarito}.`;
   $("finalizar").hidden = simulado.concluido; progresso(); bloquear(false);
@@ -60,8 +70,8 @@ function resultado() {
 }
 function formatDate(value) { const [year, month, day] = value.split("-"); return `${day}/${month}/${year}`; }
 async function historico() {
-  try { const rows = await api("/historico"); $("historico").replaceChildren(); if (!rows.length) { $("historico").append(element("p", "Seu primeiro simulado é o começo do seu histórico.", "muted")); return; }
-    rows.forEach(row => { const line = element("div", undefined, "history-row"), text = element("div"), button = element("button", row.concluido ? "Revisar" : "Continuar", "secondary"); text.append(element("strong", `ETEC · ${formatDate(row.data)}`), element("span", row.concluido ? `${row.acertos}/40 acertos · Concluído` : `${row.respondidas}/40 respondidas · Em andamento`)); button.type = "button"; button.onclick = async () => { if (ocupado) return; try { simulado = await api(`/${row.id}`); indice = 0; aviso(""); resultado(); mostrar(); $("estudo").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (error) { aviso(error.message); } }; line.append(text, button); $("historico").append(line); });
+  try { const rows = (await api("/historico")).filter(r => (r.tipo || "ETEC") === objetivo); $("historico").replaceChildren(); if (!rows.length) { $("historico").append(element("p", "Seu primeiro simulado é o começo do seu histórico.", "muted")); return; }
+    rows.forEach(row => { const line = element("div", undefined, "history-row"), text = element("div"), button = element("button", row.concluido ? "Revisar" : "Continuar", "secondary"); text.append(element("strong", `${row.tipo || "ETEC"} · ${formatDate(row.data)}`), element("span", row.concluido ? `${row.acertos}/40 acertos · Concluído` : `${row.respondidas}/40 respondidas · Em andamento`)); button.type = "button"; button.onclick = async () => { if (ocupado) return; try { simulado = await api(`/${row.id}`); indice = 0; aviso(""); resultado(); mostrar(); $("estudo").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (error) { aviso(error.message); } }; line.append(text, button); $("historico").append(line); });
   } catch (error) { if (error.status === 401) { $("historico").replaceChildren(element("a", "Entrar para ver meu histórico")); $("historico").firstChild.href = "/login.html"; } else aviso(error.message); }
 }
 $("comecar").onclick = async () => { if (ocupado) return; ocupado = true; $("comecar").disabled = true; $("comecar").textContent = "Preparando suas questões…"; aviso("");
@@ -84,10 +94,12 @@ async function inicializar() {
     if (response.status === 401) { window.location.replace("/login.html"); return; }
     if (!response.ok) throw new Error("Não foi possível carregar seu objetivo. Atualize a página para tentar novamente.");
     const perfil = await response.json();
-    if (perfil.objetivo !== "ETEC") { window.location.replace("/index.html"); return; }
+    if (!["ETEC", "CONCURSO"].includes(perfil.objetivo)) { window.location.replace("/index.html"); return; }
+    objetivo = perfil.objetivo;
+    document.querySelectorAll("[data-categoria]").forEach(n => n.textContent = objetivo === "CONCURSO" ? "Concurso público" : "ETEC");
     $("comecar").disabled = false;
     await Promise.allSettled([
-      api("/acervo").then(data => { $("acervoTotal").textContent = data.questoesAtivas; $("acervoEdicoes").textContent = data.edicoes; }).catch(error => aviso(error.message)),
+      api("/acervo?tipo=" + encodeURIComponent(objetivo)).then(data => { $("acervoTotal").textContent = data.questoesAtivas; $("acervoEdicoes").textContent = data.edicoes; }).catch(error => aviso(error.message)),
       historico()
     ]);
   } catch (error) { aviso(error.message); }

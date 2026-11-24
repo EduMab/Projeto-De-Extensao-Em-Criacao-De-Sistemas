@@ -270,3 +270,10 @@ O projeto está relacionado à:
 **ODS 4 — Educação de Qualidade**
 
 A proposta busca utilizar tecnologia para apoiar estudantes no processo de preparação e aprendizagem, oferecendo análise de desempenho e orientação personalizada.
+
+## Concursos de nível médio
+
+A importação inclui dez cadernos, 830 questões e 2.990 alternativas; 30 questões
+anuladas ficam fora dos simulados. A categoria Concurso tem seleção semanal
+própria de 40 questões e aceita certo/errado, A–D e A–E.
+Consulte [fontes, execução e validação](database/README_IMPORTACAO_CONCURSOS.md).

@@ -26,7 +26,7 @@ public class SimuladoDiarioController {
     private void origem(String header) {
         if (!"simulado".equals(header)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Requisicao invalida.");
     }
-    @GetMapping("/acervo") public Map<String, Object> acervo() { return repository.acervo(); }
+    @GetMapping("/acervo") public Map<String, Object> acervo(@RequestParam(defaultValue="ETEC") String tipo) { return repository.acervo(tipo); }
     // As rotas antigas tambem obedecem ao intervalo semanal.
     @PostMapping({"/atual", "/hoje"}) public Map<String, Object> hoje(HttpSession session, @RequestHeader(value="X-Evolua-Request", required=false) String header) {
         int id = estudante(session); origem(header); return repository.iniciar(id, LocalDate.now(clock));

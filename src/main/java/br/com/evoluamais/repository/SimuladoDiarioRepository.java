@@ -37,21 +37,29 @@ public class SimuladoDiarioRepository {
         catch (Exception e) { throw new SQLException("Conteudo de questao invalido", e); }
     }
 
-    public Map<String, Object> acervo() {
+    private static final String TOTAL_ALTERNATIVAS = "(SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao)";
+    private static String letras(String permitidas) {
+        return "(SELECT COUNT(DISTINCT a.letra) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.letra IN ("+permitidas+"))";
+    }
+    private static final String CINCO = TOTAL_ALTERNATIVAS+"=5 AND "+letras("'A','B','C','D','E'")+"=5";
+    private static final String ALTERNATIVAS_VALIDAS = " AND ((p.tipo='ETEC' AND "+CINCO+") OR (p.tipo='CONCURSO' AND (("+CINCO+") OR ("
+        +TOTAL_ALTERNATIVAS+"=4 AND "+letras("'A','B','C','D'")+"=4) OR ("+TOTAL_ALTERNATIVAS+"=2 AND "+letras("'C','E'")+"=2))))"
+        +" AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.correta=1)=1";
+
+    public Map<String, Object> acervo() { return acervo("ETEC"); }
+    public Map<String, Object> acervo(String tipo) {
+        if (!Set.of("ETEC","CONCURSO").contains(tipo)) throw erro(HttpStatus.BAD_REQUEST,"Categoria indisponível.");
         String sql = """
             SELECT COUNT(*) total, COUNT(DISTINCT q.id_prova) edicoes
             FROM questao q JOIN prova p ON p.id_prova=q.id_prova
-            WHERE p.tipo='ETEC' AND p.status_importacao='VALIDADA' AND q.anulada=0
+            WHERE p.tipo=? AND p.status_importacao='VALIDADA' AND q.anulada=0
               AND q.conteudo_json IS NOT NULL
-              AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao)=5
-              AND (SELECT COUNT(DISTINCT a.letra) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.letra IN ('A','B','C','D','E'))=5
-              AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.correta=1)=1
-            """;
-        try (Connection c = conexoes.abrir(); var s = c.prepareStatement(sql); var r = s.executeQuery()) {
-            r.next(); int total = r.getInt("total");
-            return Map.of("tipo", "ETEC", "questoesAtivas", total, "edicoes", r.getInt("edicoes"),
+            """ + ALTERNATIVAS_VALIDAS;
+        try (Connection c = conexoes.abrir(); var s = c.prepareStatement(sql)) {
+            s.setString(1,tipo); try(var r=s.executeQuery()) { r.next(); int total = r.getInt("total");
+            return Map.of("tipo", tipo, "questoesAtivas", total, "edicoes", r.getInt("edicoes"),
                     "questoesPorSimulado", 40, "intervaloDias", INTERVALO_DIAS,
-                    "semanasCom40Ineditas", total / 40, "ineditasRestantes", total % 40);
+                    "semanasCom40Ineditas", total / 40, "ineditasRestantes", total % 40); }
         } catch (SQLException e) { throw indisponivel(e); }
     }
 
@@ -59,14 +67,15 @@ public class SimuladoDiarioRepository {
         try (Connection c = conexoes.abrir()) {
             c.setAutoCommit(false);
             try {
+                String objetivo;
                 // Uma trava por estudante evita duas requisicoes criarem selecoes diferentes.
                 try (var s = c.prepareStatement("SELECT id_estudante,objetivo_prova FROM estudante WHERE id_estudante=? FOR UPDATE")) {
                     s.setInt(1, estudante);
                     try (var r = s.executeQuery()) {
                         if (!r.next()) throw erro(HttpStatus.UNAUTHORIZED, "Entre novamente na sua conta.");
-                        String objetivo = r.getString("objetivo_prova");
+                        objetivo = r.getString("objetivo_prova");
                         if (objetivo == null) throw erro(HttpStatus.CONFLICT, "Escolha seu objetivo no painel antes de abrir um simulado.");
-                        if (!"ETEC".equals(objetivo)) throw erro(HttpStatus.CONFLICT,
+                        if (!Set.of("ETEC","CONCURSO").contains(objetivo)) throw erro(HttpStatus.CONFLICT,
                                 "Os simulados do seu objetivo estão em preparação. Para praticar ETEC, selecione ETEC no painel.");
                     }
                 }
@@ -75,25 +84,26 @@ public class SimuladoDiarioRepository {
                 // A trava do estudante tambem protege requisicoes em datas diferentes na virada do dia.
                 try (var s = c.prepareStatement("""
                         SELECT id_simulado FROM simulado_diario
-                        WHERE id_estudante=? AND tipo='ETEC' AND data_simulado>=? AND data_simulado<=?
+                        WHERE id_estudante=? AND tipo=? AND data_simulado>=? AND data_simulado<=?
                         ORDER BY data_simulado DESC,id_simulado DESC LIMIT 1
                         """)) {
                     s.setInt(1, estudante);
-                    s.setDate(2, java.sql.Date.valueOf(dia.minusDays(INTERVALO_DIAS - 1)));
-                    s.setDate(3, java.sql.Date.valueOf(dia));
+                    s.setString(2, objetivo);
+                    s.setDate(3, java.sql.Date.valueOf(dia.minusDays(INTERVALO_DIAS - 1)));
+                    s.setDate(4, java.sql.Date.valueOf(dia));
                     try (var r = s.executeQuery()) { if (r.next()) existente = r.getLong(1); }
                 }
                 if (existente != null) {
                     var resultado = carregar(c, estudante, existente);
                     c.commit(); return resultado;
                 }
-                var candidatas = candidatas(c, estudante);
+                var candidatas = candidatas(c, estudante, objetivo);
                 List<Integer> ids;
                 try { ids = seletor.selecionar(candidatas, 40, new Random()); }
                 catch (IllegalStateException e) { throw erro(HttpStatus.CONFLICT, e.getMessage()); }
                 long simulado;
-                try (var s = c.prepareStatement("INSERT INTO simulado_diario(id_estudante,tipo,data_simulado) VALUES (?,'ETEC',?)", Statement.RETURN_GENERATED_KEYS)) {
-                    s.setInt(1, estudante); s.setDate(2, java.sql.Date.valueOf(dia)); s.executeUpdate();
+                try (var s = c.prepareStatement("INSERT INTO simulado_diario(id_estudante,tipo,data_simulado) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+                    s.setInt(1, estudante); s.setString(2, objetivo); s.setDate(3, java.sql.Date.valueOf(dia)); s.executeUpdate();
                     try (var r = s.getGeneratedKeys()) { if (!r.next()) throw new SQLException("Simulado sem identificador"); simulado = r.getLong(1); }
                 }
                 try (var s = c.prepareStatement("INSERT INTO simulado_diario_questao(id_simulado,posicao,id_questao,snapshot_json) VALUES (?,?,?,?)")) {
@@ -110,7 +120,7 @@ public class SimuladoDiarioRepository {
         catch (Exception e) { throw indisponivel(e); }
     }
 
-    private List<SeletorQuestoesDiarias.Candidata> candidatas(Connection c, int estudante) throws SQLException {
+    private List<SeletorQuestoesDiarias.Candidata> candidatas(Connection c, int estudante, String tipo) throws SQLException {
         String sql = """
             SELECT q.id_questao,p.codigo,
               (SELECT MAX(h.dia) FROM (
@@ -119,15 +129,11 @@ public class SimuladoDiarioRepository {
                 UNION ALL SELECT id_questao,id_estudante,CAST(data_resposta AS DATE) dia FROM resposta
               ) h WHERE h.id_questao=q.id_questao AND h.id_estudante=?) ultima
             FROM questao q JOIN prova p ON p.id_prova=q.id_prova
-            WHERE p.tipo='ETEC' AND p.status_importacao='VALIDADA' AND q.anulada=0 AND q.conteudo_json IS NOT NULL
-              AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao)=5
-              AND (SELECT COUNT(DISTINCT a.letra) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.letra IN ('A','B','C','D','E'))=5
-              AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.correta=1)=1
-            ORDER BY q.id_questao
-            """;
+            WHERE p.tipo=? AND p.status_importacao='VALIDADA' AND q.anulada=0 AND q.conteudo_json IS NOT NULL
+            """ + ALTERNATIVAS_VALIDAS + " ORDER BY q.id_questao";
         List<SeletorQuestoesDiarias.Candidata> resultado = new ArrayList<>();
         try (var s = c.prepareStatement(sql)) {
-            s.setInt(1, estudante);
+            s.setInt(1, estudante); s.setString(2,tipo);
             try (var r = s.executeQuery()) {
                 while (r.next()) { var data = r.getDate("ultima"); resultado.add(new SeletorQuestoesDiarias.Candidata(r.getInt("id_questao"), r.getString("codigo"), data == null ? null : data.toLocalDate())); }
             }
@@ -158,7 +164,7 @@ public class SimuladoDiarioRepository {
                 }
             }
         }
-        if (alternativas.size() != 5 || corretas != 1) throw new SQLException("Questao sem cinco alternativas e gabarito unico");
+        if (!Set.of(2,4,5).contains(alternativas.size()) || corretas != 1) throw new SQLException("Questao sem cinco alternativas e gabarito unico");
         return node;
     }
 
@@ -169,12 +175,12 @@ public class SimuladoDiarioRepository {
     }
 
     private Map<String, Object> carregar(Connection c, int estudante, long id) throws SQLException {
-        boolean concluido; String dia;
-        try (var s = c.prepareStatement("SELECT data_simulado,concluido_em FROM simulado_diario WHERE id_simulado=? AND id_estudante=?")) {
+        boolean concluido; String dia, tipo;
+        try (var s = c.prepareStatement("SELECT data_simulado,concluido_em,tipo FROM simulado_diario WHERE id_simulado=? AND id_estudante=?")) {
             s.setLong(1, id); s.setInt(2, estudante);
             try (var r = s.executeQuery()) {
                 if (!r.next()) throw erro(HttpStatus.NOT_FOUND, "Simulado nao encontrado.");
-                concluido = r.getTimestamp("concluido_em") != null; dia = r.getDate("data_simulado").toString();
+                concluido = r.getTimestamp("concluido_em") != null; dia = r.getDate("data_simulado").toString(); tipo=r.getString("tipo");
             }
         }
         List<JsonNode> questoes = new ArrayList<>(); int respondidas = 0, acertos = 0;
@@ -193,7 +199,7 @@ public class SimuladoDiarioRepository {
             }
         }
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("id", id); result.put("data", dia); result.put("tipo", "ETEC"); result.put("concluido", concluido);
+        result.put("id", id); result.put("data", dia); result.put("tipo", tipo); result.put("concluido", concluido);
         result.put("intervaloDias", INTERVALO_DIAS);
         result.put("proximaLiberacao", LocalDate.parse(dia).plusDays(INTERVALO_DIAS).toString());
         result.put("respondidas", respondidas); result.put("total", questoes.size()); result.put("questoes", questoes);
@@ -252,10 +258,10 @@ public class SimuladoDiarioRepository {
 
     public List<Map<String, Object>> historico(int estudante) {
         String sql = """
-            SELECT s.id_simulado,s.data_simulado,s.concluido_em,COUNT(q.id_questao) total,
+            SELECT s.id_simulado,s.tipo,s.data_simulado,s.concluido_em,COUNT(q.id_questao) total,
               COUNT(q.id_alternativa) respondidas,COALESCE(SUM(q.acertou),0) acertos
             FROM simulado_diario s LEFT JOIN simulado_diario_questao q ON q.id_simulado=s.id_simulado
-            WHERE s.id_estudante=? AND s.tipo='ETEC' GROUP BY s.id_simulado,s.data_simulado,s.concluido_em
+            WHERE s.id_estudante=? GROUP BY s.id_simulado,s.tipo,s.data_simulado,s.concluido_em
             ORDER BY s.data_simulado DESC LIMIT 30
             """;
         try (Connection c = conexoes.abrir(); var s = c.prepareStatement(sql)) {
@@ -264,7 +270,7 @@ public class SimuladoDiarioRepository {
                 while (r.next()) {
                     boolean concluido = r.getTimestamp("concluido_em") != null;
                     var linha = new LinkedHashMap<String, Object>(); linha.put("id", r.getLong("id_simulado")); linha.put("data", r.getDate("data_simulado").toString());
-                    linha.put("concluido", concluido); linha.put("respondidas", r.getInt("respondidas"));
+                    linha.put("tipo",r.getString("tipo")); linha.put("concluido", concluido); linha.put("respondidas", r.getInt("respondidas"));
                     if (concluido) linha.put("acertos", r.getInt("acertos")); result.add(linha);
                 }
             }
