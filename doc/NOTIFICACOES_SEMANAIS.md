@@ -22,11 +22,11 @@ O site não solicita permissão automaticamente. O estudante ativa os avisos no 
 
 ## Instalação do banco
 
-No MySQL do ambiente, execute nesta ordem, uma única vez:
-1. `database/05_notificacoes.sql`
-2. `database/06_push_notificacoes.sql`
+O repositório já possui migrações numeradas até `database/07_simulados_por_categoria.sql`. Para evitar conflito com os scripts existentes, as notificações usam os próximos números. No MySQL do ambiente, execute nesta ordem, uma única vez, após as migrações anteriores:
+1. `database/08_notificacoes.sql`
+2. `database/09_push_notificacoes.sql`
 
-A segunda migração adiciona o controle de entrega e cria a tabela de assinaturas por dispositivo. Faça backup antes de executar migrações no banco compartilhado ou de produção.
+A segunda migração adiciona o controle de entrega e cria a tabela de assinaturas por dispositivo. Faça backup antes de executar migrações no banco compartilhado ou de produção. Não execute os antigos nomes `05_notificacoes.sql` e `06_push_notificacoes.sql`; eles foram substituídos pelos arquivos 08 e 09 para respeitar a sequência real do projeto.
 
 ## Configuração VAPID no servidor
 
@@ -58,7 +58,7 @@ As operações de escrita exigem a sessão do estudante e o cabeçalho `X-Evolua
 
 ## Teste manual
 
-1. Execute as duas migrações no banco de desenvolvimento.
+1. Execute as duas migrações novas (`08` e `09`) no banco de desenvolvimento, depois das migrações anteriores.
 2. Configure as três variáveis VAPID no ambiente local/host.
 3. Inicie o Spring Boot e acesse o site por HTTPS (ou `localhost`).
 4. Entre com uma conta de estudante cujo objetivo tenha simulados disponíveis.
