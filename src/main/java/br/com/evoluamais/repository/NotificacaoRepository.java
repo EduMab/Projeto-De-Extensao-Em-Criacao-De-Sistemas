@@ -12,12 +12,18 @@ import java.util.*;
 @Repository
 public class NotificacaoRepository {
     @FunctionalInterface public interface Conexoes { Connection abrir() throws SQLException; }
+    public record EntregaPush(long idNotificacao, String endpoint, String p256dh, String auth,
+                              String titulo, String mensagem, String link) {}
     private final Conexoes conexoes;
 
     public NotificacaoRepository() { this(ConexaoBanco::conectar); }
     public NotificacaoRepository(Conexoes conexoes) { this.conexoes = conexoes; }
 
-    /** Cria no maximo uma notificacao por aluno e por ciclo semanal. */
+    /**
+     * Gera avisos coerentes com o ciclo semanal do simulado:
+     * primeira tarefa, lembrete apos 3 dias e nova tarefa apos 7 dias.
+     * A chave unica impede duplicidade mesmo com mais de uma instancia da aplicacao.
+     */
     public int gerarPendentes(LocalDate hoje) {
         String alunos = """
             SELECT e.id_estudante, e.objetivo_prova, s.id_simulado,
@@ -51,7 +57,7 @@ public class NotificacaoRepository {
                 if (semSimulado) {
                     preencher(insert, estudante, "TAREFA_INICIAL_" + objetivo,
                         "TAREFA_SEMANAL", "Sua tarefa da semana está disponível!",
-                        "Separe um momento para responder às 40 questões da sua preparação.",
+                        "Seu plano de estudos tem uma nova etapa. Reserve um momento para responder às 40 questões.",
                         "/simulados.html");
                     criadas += insert.executeUpdate();
                     continue;
@@ -63,13 +69,13 @@ public class NotificacaoRepository {
                 if (!hoje.isBefore(liberacao)) {
                     preencher(insert, estudante, "TAREFA_" + objetivo + "_" + liberacao,
                         "TAREFA_SEMANAL", "Uma nova tarefa semanal está liberada!",
-                        "Seu próximo simulado de 40 questões já pode ser iniciado.",
+                        "Continue sua preparação: um novo simulado de 40 questões está disponível.",
                         "/simulados.html");
                     criadas += insert.executeUpdate();
                 } else if (concluido == null && !hoje.isBefore(abertura.plusDays(3))) {
                     preencher(insert, estudante, "LEMBRETE_" + idSimulado,
-                        "LEMBRETE_TAREFA", "Não deixe sua tarefa da semana para depois",
-                        "Seu simulado continua em andamento. Volte e conclua as 40 questões no seu ritmo.",
+                        "LEMBRETE_TAREFA", "Que tal retomar seus estudos?",
+                        "Seu simulado semanal ainda está em andamento. Volte de onde parou e avance no seu ritmo.",
                         "/simulados.html");
                     criadas += insert.executeUpdate();
                 }
@@ -107,7 +113,8 @@ public class NotificacaoRepository {
                     item.put("titulo", r.getString("titulo"));
                     item.put("mensagem", r.getString("mensagem"));
                     item.put("link", r.getString("link"));
-                    item.put("criadaEm", r.getTimestamp("criada_em").toString());
+                    Timestamp criada = r.getTimestamp("criada_em");
+                    item.put("criadaEm", criada == null ? null : criada.toString());
                     item.put("lida", lida != null);
                     itens.add(item);
                 }
@@ -140,5 +147,40 @@ public class NotificacaoRepository {
                 "UPDATE notificacao SET lida_em=CURRENT_TIMESTAMP WHERE id_estudante=? AND lida_em IS NULL")) {
             s.setInt(1,estudante); s.executeUpdate();
         } catch (SQLException e) { throw new IllegalStateException("Não foi possível atualizar as notificações.", e); }
+    }
+
+    public List<EntregaPush> buscarEntregasPushPendentes() {
+        String sql = """
+            SELECT n.id_notificacao, p.endpoint, p.p256dh, p.auth,
+                   n.titulo, n.mensagem, n.link
+            FROM notificacao n
+            JOIN push_subscription p ON p.id_estudante=n.id_estudante
+            WHERE n.push_enviada_em IS NULL
+            ORDER BY n.id_notificacao, p.id_assinatura
+            LIMIT 500
+            """;
+        List<EntregaPush> entregas = new ArrayList<>();
+        try (Connection c=conexoes.abrir(); PreparedStatement s=c.prepareStatement(sql);
+             ResultSet r=s.executeQuery()) {
+            while(r.next()) entregas.add(new EntregaPush(r.getLong("id_notificacao"),
+                r.getString("endpoint"),r.getString("p256dh"),r.getString("auth"),
+                r.getString("titulo"),r.getString("mensagem"),r.getString("link")));
+            return entregas;
+        } catch(SQLException e) { throw new IllegalStateException("Não foi possível consultar a fila de notificações push.",e); }
+    }
+
+    public void marcarPushEnviado(long idNotificacao) {
+        try(Connection c=conexoes.abrir(); PreparedStatement s=c.prepareStatement(
+            "UPDATE notificacao SET push_enviada_em=CURRENT_TIMESTAMP, push_ultimo_erro=NULL WHERE id_notificacao=? AND push_enviada_em IS NULL")) {
+            s.setLong(1,idNotificacao); s.executeUpdate();
+        } catch(SQLException e) { throw new IllegalStateException("Não foi possível confirmar o envio push.",e); }
+    }
+
+    public void registrarFalhaPush(long idNotificacao, String motivo) {
+        try(Connection c=conexoes.abrir(); PreparedStatement s=c.prepareStatement(
+            "UPDATE notificacao SET push_tentativas=push_tentativas+1, push_ultimo_erro=? WHERE id_notificacao=? AND push_enviada_em IS NULL")) {
+            s.setString(1,motivo == null ? "Falha de entrega" : motivo.substring(0,Math.min(240,motivo.length())));
+            s.setLong(2,idNotificacao); s.executeUpdate();
+        } catch(SQLException e) { throw new IllegalStateException("Não foi possível registrar falha de push.",e); }
     }
 }
