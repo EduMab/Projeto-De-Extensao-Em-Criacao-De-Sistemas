@@ -8,7 +8,54 @@ O arquivo `06_importacao_10_concursos_ensino_medio.sql` inclui dez registros na 
 - Banco criado com `database/01_estrutura.sql` atualizado; ou, em instalações antigas, migração `database/03_metadados_provas.sql` aplicada.
 - Backup recente antes da execução.
 
-## Execução
+## Execução automatizada
+
+O programa `scripts/importar_concursos.py` usa a mesma carga SQL, mas controla
+a transação: confere schema e chave única, preserva cadastros existentes,
+inclui os ausentes e verifica os dez códigos antes de confirmar. Qualquer
+falha reverte todos os novos cadastros. Não cria tabelas nem altera questões,
+alternativas, estudantes ou provas de outras categorias.
+
+No GitHub, configure os Secrets do ambiente `concursos` (ou do repositório):
+
+| Secret | Conteúdo |
+| --- | --- |
+| `DB_HOST` | Host público do MySQL compartilhado |
+| `DB_PORT` | Porta pública; padrão 3306 |
+| `DB_NAME` | Nome exato do banco existente |
+| `DB_USUARIO` | Conta com SELECT e INSERT em `prova` |
+| `DB_SENHA` | Senha da conta, cadastrada somente em Secrets |
+| `DB_SSL_CA` | Opcional: conteúdo PEM do certificado CA da hospedagem |
+
+O MySQL deve ser o mesmo utilizado pelo grupo. Acesso ao GitHub/Railway da API
+não fornece automaticamente acesso a um banco em outra conta/workspace.
+Não recrie o banco que já contém as edições ETEC.
+
+O workflow `.github/workflows/importar-concursos.yml` precisa estar na branch
+padrão para aparecer em **Actions > Importar dez concursos > Run workflow**.
+Primeiro ele testa a carga em um MySQL 8.0 isolado. Depois usa os Secrets para
+simular no banco compartilhado. Marque `aplicar` para confirmar os cadastros.
+Pull requests executam apenas testes isolados, sem acesso ao banco do grupo.
+O resultado informa `novas`, `existentes` e `questoes_importadas=0`.
+
+Para executar localmente com as mesmas variáveis no ambiente:
+
+```bash
+python -m pip install -r scripts/requirements-concursos.txt
+python scripts/importar_concursos.py --validar-arquivo
+python scripts/importar_concursos.py
+python scripts/importar_concursos.py --aplicar
+```
+
+Sem `--aplicar`, o programa testa a inserção e faz rollback; pode consumir
+números de AUTO_INCREMENT mesmo revertendo os cadastros. O padrão é TLS com
+validação do certificado e hostname (`DB_SSL_MODE=VERIFY_IDENTITY`). Se a
+hospedagem exige TLS com certificado autoassinado sem CA disponível, configure
+a variável `DB_SSL_MODE=REQUIRED`: mantém criptografia, mas não autentica o
+certificado do servidor. O modo `DISABLED` só funciona em testes em localhost.
+Não registre credenciais no código, no SQL, em logs ou na conversa.
+
+## Execução manual no Workbench
 
 1. Selecione o banco `evoluamais` no MySQL Workbench.
 2. Abra e execute `06_importacao_10_concursos_ensino_medio.sql`.
@@ -27,3 +74,4 @@ Para publicar cada prova no aplicativo, o responsável pelo conteúdo precisa:
 O script usa o campo `codigo` (chave única) com `INSERT IGNORE`; reexecutá-lo não duplica os registros existentes nem substitui correções já feitas.
 
 Os endereços de PDF apontam para páginas de órgãos, bancas e catálogos externos. Confira as condições de uso de cada fonte antes de armazenar cópias locais ou redistribuir os documentos.
+
