@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/notificacoes")
@@ -100,6 +99,7 @@ public class NotificacaoController {
     /** Restringe endpoints aos servicos conhecidos de push dos navegadores (mitigacao SSRF). */
     private void validarEndpoint(String endpoint) {
         try {
+            if(endpoint==null||endpoint.length()>2048) throw new IllegalArgumentException();
             URI uri=URI.create(endpoint);
             String host=uri.getHost();
             boolean hostValido=host!=null && (
