@@ -23,7 +23,7 @@ class SimuladoDiarioRepositoryTest {
             s.execute("CREATE TABLE questao(id_questao INT PRIMARY KEY,id_prova INT,numero_original INT,enunciado CLOB,anulada INT,conteudo_json CLOB)");
             s.execute("CREATE TABLE alternativa(id_alternativa INT PRIMARY KEY,id_questao INT,letra CHAR(1),texto VARCHAR(100),correta INT)");
             s.execute("CREATE TABLE resposta(id_questao INT,id_estudante INT,data_resposta TIMESTAMP)");
-            s.execute("CREATE TABLE simulado_diario(id_simulado BIGINT AUTO_INCREMENT PRIMARY KEY,id_estudante INT,tipo VARCHAR(20),data_simulado DATE,concluido_em TIMESTAMP,UNIQUE(id_estudante,data_simulado))");
+            s.execute("CREATE TABLE simulado_diario(id_simulado BIGINT AUTO_INCREMENT PRIMARY KEY,id_estudante INT,tipo VARCHAR(20),data_simulado DATE,concluido_em TIMESTAMP,UNIQUE(id_estudante,tipo,data_simulado))");
             s.execute("CREATE TABLE simulado_diario_questao(id_simulado BIGINT,posicao INT,id_questao INT,snapshot_json CLOB,id_alternativa INT,acertou INT,respondida_em TIMESTAMP,PRIMARY KEY(id_simulado,posicao),UNIQUE(id_simulado,id_questao))");
             for (int i=1;i<=4;i++) s.execute("INSERT INTO prova VALUES("+i+",'ETEC','ETEC-"+i+"','"+i+"','ETEC','VALIDADA')");
             for (int i=1;i<=80;i++) {
@@ -106,7 +106,7 @@ class SimuladoDiarioRepositoryTest {
     @Test void exigeObjetivoETECETrocarNaoApagaNemAntecipaSimulado() throws Exception {
         var primeiro = repo.iniciar(1,hoje);
         long id = ((Number)primeiro.get("id")).longValue();
-        for (String objetivo : new String[]{null,"ENEM","CONCURSO","FUVEST"}) {
+        for (String objetivo : new String[]{null,"ENEM","FUVEST"}) {
             try (var c=DriverManager.getConnection(url);var s=c.prepareStatement("UPDATE estudante SET objetivo_prova=? WHERE id_estudante=1")) {
                 s.setString(1,objetivo);s.executeUpdate();
             }
@@ -145,5 +145,26 @@ class SimuladoDiarioRepositoryTest {
             for(int i=1;i<=40;i++)s.execute("INSERT INTO resposta VALUES("+i+",1,TIMESTAMP '2026-11-01 12:00:00')");
         }
         assertTrue(ids(repo.iniciar(1,hoje)).stream().allMatch(id->id>40));
+    }
+    @Test void concursoAceitaDuasQuatroECincoAlternativasESemanaIsolada() throws Exception {
+        var etec=repo.iniciar(1,hoje);
+        try(var c=DriverManager.getConnection(url);var s=c.createStatement()) {
+            s.execute("INSERT INTO prova VALUES(5,'Concurso','CONCURSO-1','2024','CONCURSO','VALIDADA')");
+            s.execute("UPDATE estudante SET objetivo_prova='CONCURSO' WHERE id_estudante=1");
+            for(int q=81;q<=140;q++) {
+                String letras=q<=100?"CE":q<=120?"ABCD":"ABCDE";
+                s.execute("INSERT INTO questao VALUES("+q+",5,"+q+",'Enunciado real',0,'{\"modo\":\"pdf_original\"}')");
+                for(int a=0;a<letras.length();a++) s.execute("INSERT INTO alternativa VALUES("+(q*10+a)+","+q+",'"+letras.charAt(a)+"','Resposta',"+(a==0?1:0)+")");
+            }
+        }
+        assertEquals(60,repo.acervo("CONCURSO").get("questoesAtivas"));
+        assertEquals(80,repo.acervo().get("questoesAtivas"));
+        var concurso=repo.iniciar(1,hoje);long id=((Number)concurso.get("id")).longValue();
+        assertEquals("CONCURSO",concurso.get("tipo"));assertNotEquals(etec.get("id"),concurso.get("id"));
+        assertTrue(ids(concurso).stream().allMatch(q->q>80));
+        for(var q:questoes(concurso)) repo.responder(1,id,q.get("posicao").asInt(),q.get("alternativas").get(0).get("id").asInt());
+        assertEquals(40,repo.finalizar(1,id).get("acertos"));
+        try(var c=DriverManager.getConnection(url);var s=c.createStatement()){s.execute("UPDATE estudante SET objetivo_prova='ETEC' WHERE id_estudante=1");}
+        assertEquals(etec,repo.iniciar(1,hoje));
     }
 }

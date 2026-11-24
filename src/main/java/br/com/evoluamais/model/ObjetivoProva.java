@@ -6,7 +6,7 @@ import org.springframework.web.server.ResponseStatusException;
 public enum ObjetivoProva {
     ETEC("ETEC", "Ensino técnico e médio", true),
     ENEM("ENEM", "Seu caminho para a faculdade", false),
-    CONCURSO("Concurso público", "Preparação para a carreira pública", false),
+    CONCURSO("Concurso público", "Preparação para a carreira pública", true),
     FUVEST("FUVEST", "Preparação para a USP", false);
 
     private final String nome;
