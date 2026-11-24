@@ -1,0 +1,208 @@
+{
+  "tipo": "CONCURSO",
+  "origem": "https://www.pciconcursos.com.br/provas/cargos-ensino-medio",
+  "provas": [
+    {
+      "slug": "aedecca-2010",
+      "codigo": "PCI-AEDECCA-2010",
+      "nome": "AEDECCA/FACHUCA - Assistente Administrativo",
+      "ano": 2010,
+      "banca": "ASPERHS",
+      "total": 40,
+      "paginaGabarito": 26,
+      "colunas": 2,
+      "limites": [
+        56,
+        299,
+        329,
+        572
+      ],
+      "topo": 60,
+      "rodape": 786.5,
+      "urlProva": "https://www.pciconcursos.com.br/provas/14393575/be5df0872f5/prova_99_3_26.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/14393575/71b5b339474/gabaritos_cabo_de_santo_agostinho.pdf",
+      "gabaritoPreliminar": true
+    },
+    {
+      "slug": "olegario-2011",
+      "codigo": "PCI-OLEGARIO-2011",
+      "nome": "Presidente Olegário - Auxiliar Administrativo",
+      "ano": 2011,
+      "banca": "FUMARC",
+      "total": 20,
+      "paginaGabarito": 2,
+      "colunas": 2,
+      "limites": [
+        27,
+        286,
+        310,
+        568
+      ],
+      "topo": 81,
+      "rodape": 790,
+      "urlProva": "https://www.pciconcursos.com.br/provas/18357343/48cd7d24a91/03_fun_ensino_medio_olegario_20111220_151104.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/18357343/5e71b25d67a/gabaritos.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "rio-serra-2010",
+      "codigo": "PCI-RIO-SERRA-2010",
+      "nome": "Rio Grande da Serra - Agente Cultural e cargos administrativos",
+      "ano": 2010,
+      "banca": "MOURA MELO",
+      "total": 50,
+      "paginaGabarito": 3,
+      "colunas": 2,
+      "limites": [
+        30,
+        299,
+        301,
+        569
+      ],
+      "topo": 63,
+      "rodape": 790,
+      "urlProva": "https://www.pciconcursos.com.br/provas/15052068/b93fd4142f9/medio_tarde_ok.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/15052068/ae034cb9d68/gabaritos_rio_grande_da_serra2.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "mato-grosso-2010",
+      "codigo": "PCI-MATO-GROSSO-2010",
+      "nome": "Mato Grosso/PB - Cargos de ensino médio",
+      "ano": 2010,
+      "banca": "SOLUÇÕES",
+      "total": 32,
+      "paginaGabarito": 6,
+      "colunas": 1,
+      "limites": [
+        27,
+        569
+      ],
+      "topo": 29,
+      "rodape": 804,
+      "urlProva": "https://www.pciconcursos.com.br/provas/14966130/251a8004cbd/ensino_medio.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/14966130/7f5d04b0e5c/gabaritos_mato_grosso2.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "montes-claros-2010",
+      "codigo": "PCI-MONTES-CLAROS-2010",
+      "nome": "Montes Claros - Assistente Administrativo",
+      "ano": 2010,
+      "banca": "UNIMONTES/COTEC",
+      "total": 30,
+      "paginaGabarito": 2,
+      "colunas": 1,
+      "limites": [
+        35,
+        562
+      ],
+      "topo": 48,
+      "rodape": 790,
+      "urlProva": "https://www.pciconcursos.com.br/provas/14940039/72bfebc8932/002.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/14940039/6d6bf731376/gabaritos_montes_claros.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "santa-cruz-2010",
+      "codigo": "PCI-SANTA-CRUZ-2010",
+      "nome": "Santa Cruz - Agente Administrativo e fiscais",
+      "ano": 2010,
+      "banca": "ACAPLAM",
+      "total": 40,
+      "paginaGabarito": 21,
+      "colunas": 2,
+      "limites": [
+        42,
+        285,
+        314,
+        557
+      ],
+      "topo": 54,
+      "rodape": 790,
+      "urlProva": "https://www.pciconcursos.com.br/provas/14181525/4c57940598f/pv_nivel_medio.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/14181525/cd72e5fd3a7/gabaritos_santa_cruz.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "sao-francisco-2010",
+      "codigo": "PCI-SAO-FRANCISCO-2010",
+      "nome": "São Francisco do Oeste - Cargos de ensino médio",
+      "ano": 2010,
+      "banca": "SOLUÇÕES",
+      "total": 32,
+      "paginaGabarito": 3,
+      "colunas": 1,
+      "limites": [
+        29,
+        569
+      ],
+      "topo": 29,
+      "rodape": 804,
+      "urlProva": "https://www.pciconcursos.com.br/provas/14382076/4cea8080cb7/ensino_medio.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/14382076/a992817000c/gabaritos_sao_francisco_do_oeste.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "primavera-2009",
+      "codigo": "PCI-PRIMAVERA-2009",
+      "nome": "Primavera - Agente Administrativo",
+      "ano": 2009,
+      "banca": "ASPERHS",
+      "total": 40,
+      "paginaGabarito": 28,
+      "colunas": 2,
+      "limites": [
+        56,
+        299,
+        329,
+        572
+      ],
+      "topo": 60,
+      "rodape": 777.5,
+      "urlProva": "https://www.pciconcursos.com.br/provas/13400666/70151684086/prova_86_7_33.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/13400666/550ac7030c6/gabaritos_primavera.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "papagaios-2009",
+      "codigo": "PCI-PAPAGAIOS-2009",
+      "nome": "Papagaios - Auxiliar Administrativo e cargos correlatos",
+      "ano": 2009,
+      "banca": "FUMARC",
+      "total": 40,
+      "paginaGabarito": 5,
+      "colunas": 1,
+      "limites": [
+        83,
+        516
+      ],
+      "topo": 95,
+      "rodape": 785,
+      "urlProva": "https://www.pciconcursos.com.br/provas/12677602/1a38f833452/caderno_05_20090302_110059.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/12677602/09186e9c4e6/gabaritos_prefeitura_papagaio.pdf",
+      "gabaritoPreliminar": false
+    },
+    {
+      "slug": "casserengue-2009",
+      "codigo": "PCI-CASSERENGUE-2009",
+      "nome": "Casserengue - Agente Administrativo",
+      "ano": 2009,
+      "banca": "ADVISE",
+      "total": 40,
+      "paginaGabarito": 1,
+      "colunas": 2,
+      "limites": [
+        33,
+        287,
+        311,
+        564
+      ],
+      "topo": 67,
+      "rodape": 790,
+      "urlProva": "https://www.pciconcursos.com.br/provas/12887315/c0c74e0fae9/aa_aa_af_se_tas.pdf",
+      "urlGabarito": "https://www.pciconcursos.com.br/provas/12887315/c124dcbd28b/casserengue_gab_definitivo_2009_10_30.pdf",
+      "gabaritoPreliminar": false
+    }
+  ]
+}

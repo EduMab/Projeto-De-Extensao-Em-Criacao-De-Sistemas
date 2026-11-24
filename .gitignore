@@ -60,3 +60,6 @@ __pycache__/
 
 # JSON regenerável; a carga completa é versionada em gzip.
 /acervo/concursos/questoes.json
+
+# Gerados pelos PDFs e incluídos nos pacotes recortes-*.zip.
+src/main/resources/static/questoes/concursos/pci-*/
