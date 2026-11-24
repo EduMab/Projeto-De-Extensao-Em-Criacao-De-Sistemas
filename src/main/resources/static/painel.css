@@ -112,3 +112,19 @@ footer { padding:20px; text-align:center; color:#827b8d; font-size:11px; }
   .notification-trigger span { display:none; }
   .notification-center { right:4%; top:72px; }
 }
+
+
+/* Preferencias de notificacao, mantendo a identidade visual do Evolua+. */
+.push-preferences { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid var(--line); }
+.push-preferences strong { display:block; color:var(--dark); font-size:13px; }
+.push-preferences p { margin-top:4px; color:var(--muted); font-size:12px; max-width:330px; }
+.push-preferences .secondary { flex-shrink:0; padding:9px 13px; font-size:12px; }
+.notification-item { border-bottom:1px solid var(--line); }
+.notification-item:last-child { border-bottom:0; }
+.notification-item.unread { border-left:3px solid var(--purple); }
+.notification-item a:hover,.notification-heading button:hover,.notification-read:hover { text-decoration:underline; }
+.notification-trigger:focus-visible,.push-preferences button:focus-visible { outline:3px solid #ad91eb; outline-offset:3px; }
+@media(max-width:560px) {
+  .push-preferences { align-items:flex-start; flex-direction:column; }
+  .push-preferences .secondary { width:100%; }
+}
