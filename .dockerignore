@@ -8,5 +8,6 @@ target
 doc
 database
 *.pdf
+!src/main/resources/static/questoes/**/*.pdf
 *.log
 logs

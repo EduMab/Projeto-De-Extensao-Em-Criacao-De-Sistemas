@@ -3,7 +3,10 @@ FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src ./src
-RUN mvn -B -ntp clean package
+COPY acervo ./acervo
+COPY .docker-build-cache /root/.m2/repository
+ARG MAVEN_BUILD_FLAGS=""
+RUN mvn -B -ntp ${MAVEN_BUILD_FLAGS} clean package
 
 FROM eclipse-temurin:25-jre
 

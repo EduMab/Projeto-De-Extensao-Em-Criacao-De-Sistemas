@@ -63,3 +63,8 @@ __pycache__/
 
 # Gerados pelos PDFs e incluídos nos pacotes recortes-*.zip.
 src/main/resources/static/questoes/concursos/pci-*/
+
+/tmp/
+
+/.docker-build-cache/*
+!/.docker-build-cache/.gitkeep

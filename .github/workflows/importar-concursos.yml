@@ -13,6 +13,7 @@ on:
       - 'src/**'
       - 'acervo/concursos/**'
       - 'pom.xml'
+      - 'Dockerfile'
       - 'database/01_estrutura.sql'
       - 'database/06_importacao_10_concursos_ensino_medio.sql'
       - '.github/workflows/importar-concursos.yml'
@@ -52,7 +53,16 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - run: mvn -B test
+      - run: mvn -B clean package
+      - name: Reutilizar dependências Maven na verificação Docker
+        run: |
+          cp -a "$HOME/.m2/repository/." .docker-build-cache/
+          # O runner e a imagem podem usar IDs de mirror diferentes.
+          # Os artefatos já foram validados pelo clean package acima.
+          find .docker-build-cache -name _remote.repositories -delete
+          find .docker-build-cache -name '*.lastUpdated' -delete
+      - name: Validar imagem usada no deploy
+        run: docker build --build-arg MAVEN_BUILD_FLAGS=-o --tag evoluamais-concursos:test .
       - run: python -m unittest discover -s scripts -p test_acervo_concursos.py -v
       - run: python -m unittest discover -s scripts -p test_recortes_concursos.py -v
       - name: Validar carga, reexecução e reversão no MySQL de teste
