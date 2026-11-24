@@ -69,7 +69,7 @@ As operações de escrita exigem a sessão do estudante e o cabeçalho `X-Evolua
 
 ## Limites e operação
 
-- O agendador depende de a aplicação estar ligada às 9h. Se o host suspender o processo, a execução ocorrerá quando a aplicação voltar e o agendador chegar ao próximo horário programado; para operação garantida, usar um scheduler externo/worker sempre ativo.
+- O agendador verifica também na inicialização. Se o host suspender o processo, as notificações pendentes são processadas quando a aplicação reiniciar; para entrega pontual garantida, usar um scheduler externo/worker sempre ativo.
 - O push depende do serviço do navegador e das permissões do dispositivo; não há garantia de entrega imediata. A central no painel permanece como fonte persistente.
 - O servidor só marca uma notificação como enviada por push após receber resposta 2xx de pelo menos uma inscrição. Falhas temporárias ficam registradas para nova tentativa.
 - A implementação não lê localização, contatos ou dados pessoais além do identificador de conta e do endpoint/credenciais técnicas da inscrição push.
