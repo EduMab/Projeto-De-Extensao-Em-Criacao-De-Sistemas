@@ -75,3 +75,14 @@ O script usa o campo `codigo` (chave única) com `INSERT IGNORE`; reexecutá-lo 
 
 Os endereços de PDF apontam para páginas de órgãos, bancas e catálogos externos. Confira as condições de uso de cada fonte antes de armazenar cópias locais ou redistribuir os documentos.
 
+
+## Carga executada no Railway em 24/11/2026
+
+A rotina `PreparacaoBanco` do projeto `EvoluaMais` executou a carga no banco
+`evoluamais`, usando `editor_concurso` e as credenciais existentes no ambiente.
+A primeira execução incluiu dez cadastros (IDs 17–26), todos em RASCUNHO com
+links preenchidos. A reexecução confirmou os mesmos dez e incluiu zero novos.
+Foram preservadas 16 provas ETEC, 790 questões e 3.950 alternativas.
+Os comprovantes estão em `acervo/concursos/comprovante-nuvem.json`, e a fonte
+completa da rotina está em `scripts/railway_preparacao_concursos.ts`.
+As questões e alternativas destes concursos ainda precisam ser importadas.
