@@ -136,9 +136,54 @@ $("sair").onclick = async () => {
     localStorage.removeItem("idEstudante"); localStorage.removeItem("nomeEstudante"); window.location.replace("/login.html");
   } catch (error) { erro(error.message); $("sair").disabled = false; }
 };
+
+async function carregarNotificacoes() {
+  try {
+    const dados = await requisicao("/api/notificacoes");
+    const contador = $("contadorNotificacoes");
+    contador.textContent = dados.naoLidas;
+    contador.hidden = dados.naoLidas === 0;
+    const lista = $("listaNotificacoes");
+    lista.replaceChildren();
+    if (!dados.notificacoes.length) {
+      lista.append(elemento("p", "Você não tem notificações por enquanto.", "muted"));
+      return;
+    }
+    dados.notificacoes.forEach(item => {
+      const card = elemento("article", undefined, "notification-item" + (item.lida ? "" : " unread"));
+      const conteudo = elemento("div");
+      conteudo.append(elemento("strong", item.titulo), elemento("p", item.mensagem));
+      const a = elemento("a", "Abrir tarefa →");
+      a.href = item.link || "/simulados.html";
+      a.onclick = async () => { if (!item.lida) await requisicao("/api/notificacoes/"+item.id+"/lida", {method:"POST"}); };
+      conteudo.append(a);
+      card.append(conteudo);
+      if (!item.lida) {
+        const btn = elemento("button", "Marcar como lida", "notification-read");
+        btn.type = "button";
+        btn.onclick = async () => { await requisicao("/api/notificacoes/"+item.id+"/lida", {method:"POST"}); await carregarNotificacoes(); };
+        card.append(btn);
+      }
+      lista.append(card);
+    });
+  } catch (e) {
+    if (e.message && !e.message.includes("Entre novamente")) $("listaNotificacoes").replaceChildren(elemento("p", "Não foi possível carregar as notificações.", "muted"));
+  }
+}
+$("abrirNotificacoes").onclick = async () => {
+  const abrir = $("centralNotificacoes").hidden;
+  $("centralNotificacoes").hidden = !abrir;
+  $("abrirNotificacoes").setAttribute("aria-expanded", String(abrir));
+  if (abrir) await carregarNotificacoes();
+};
+$("marcarTodasNotificacoes").onclick = async () => {
+  await requisicao("/api/notificacoes/lidas", {method:"POST"});
+  await carregarNotificacoes();
+};
+
 async function iniciar() {
   $("carregamento").hidden = false; $("tentarNovamente").hidden = true; erro("");
-  try { perfil = await requisicao("/api/perfil"); renderizar(); }
+  try { perfil = await requisicao("/api/perfil"); renderizar(); carregarNotificacoes(); }
   catch (error) { erro(error.message); $("tentarNovamente").hidden = false; }
   finally { $("carregamento").hidden = true; }
 }
