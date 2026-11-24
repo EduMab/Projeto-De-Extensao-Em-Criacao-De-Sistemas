@@ -99,14 +99,13 @@ public class NotificacaoRepository {
             ORDER BY criada_em DESC, id_notificacao DESC LIMIT 30
             """;
         List<Map<String,Object>> itens = new ArrayList<>();
-        int naoLidas = 0;
+        int naoLidas;
         try (Connection c = conexoes.abrir();
              PreparedStatement s = c.prepareStatement(sql)) {
             s.setInt(1, estudante);
             try (ResultSet r = s.executeQuery()) {
                 while (r.next()) {
                     Timestamp lida = r.getTimestamp("lida_em");
-                    if (lida == null) naoLidas++;
                     Map<String,Object> item = new LinkedHashMap<>();
                     item.put("id", r.getLong("id_notificacao"));
                     item.put("tipo", r.getString("tipo"));
@@ -117,6 +116,15 @@ public class NotificacaoRepository {
                     item.put("criadaEm", criada == null ? null : criada.toString());
                     item.put("lida", lida != null);
                     itens.add(item);
+                }
+            }
+            // O contador representa todas as notificacoes pendentes, nao apenas as 30 exibidas.
+            try (PreparedStatement contagem = c.prepareStatement(
+                    "SELECT COUNT(*) FROM notificacao WHERE id_estudante=? AND lida_em IS NULL")) {
+                contagem.setInt(1, estudante);
+                try (ResultSet r = contagem.executeQuery()) {
+                    r.next();
+                    naoLidas = r.getInt(1);
                 }
             }
             return Map.of("naoLidas", naoLidas, "notificacoes", itens);
