@@ -53,9 +53,11 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - run: mvn -B test
+      - run: mvn -B clean package
+      - name: Reutilizar dependências Maven na verificação Docker
+        run: cp -a "$HOME/.m2/repository/." .docker-build-cache/
       - name: Validar imagem usada no deploy
-        run: docker build --tag evoluamais-concursos:test .
+        run: docker build --build-arg MAVEN_BUILD_FLAGS=-o --tag evoluamais-concursos:test .
       - run: python -m unittest discover -s scripts -p test_acervo_concursos.py -v
       - run: python -m unittest discover -s scripts -p test_recortes_concursos.py -v
       - name: Validar carga, reexecução e reversão no MySQL de teste

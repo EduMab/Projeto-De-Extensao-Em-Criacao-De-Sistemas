@@ -65,3 +65,6 @@ __pycache__/
 src/main/resources/static/questoes/concursos/pci-*/
 
 /tmp/
+
+/.docker-build-cache/*
+!/.docker-build-cache/.gitkeep
