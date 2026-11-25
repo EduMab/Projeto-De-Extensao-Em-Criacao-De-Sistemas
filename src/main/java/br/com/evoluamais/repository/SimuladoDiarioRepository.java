@@ -17,6 +17,7 @@ import java.util.*;
 @Repository
 public class SimuladoDiarioRepository {
     private static final int INTERVALO_DIAS = 7;
+    private static final Set<String> TIPOS_SEMANAIS = Set.of("ETEC", "CONCURSO", "FUVEST");
     @FunctionalInterface public interface Conexoes { Connection abrir() throws SQLException; }
     private final Conexoes conexoes;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -42,13 +43,13 @@ public class SimuladoDiarioRepository {
         return "(SELECT COUNT(DISTINCT a.letra) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.letra IN ("+permitidas+"))";
     }
     private static final String CINCO = TOTAL_ALTERNATIVAS+"=5 AND "+letras("'A','B','C','D','E'")+"=5";
-    private static final String ALTERNATIVAS_VALIDAS = " AND ((p.tipo='ETEC' AND "+CINCO+") OR (p.tipo='CONCURSO' AND (("+CINCO+") OR ("
+    private static final String ALTERNATIVAS_VALIDAS = " AND ((p.tipo IN ('ETEC','FUVEST') AND "+CINCO+") OR (p.tipo='CONCURSO' AND (("+CINCO+") OR ("
         +TOTAL_ALTERNATIVAS+"=4 AND "+letras("'A','B','C','D'")+"=4) OR ("+TOTAL_ALTERNATIVAS+"=2 AND "+letras("'C','E'")+"=2))))"
         +" AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.correta=1)=1";
 
     public Map<String, Object> acervo() { return acervo("ETEC"); }
     public Map<String, Object> acervo(String tipo) {
-        if (!Set.of("ETEC","CONCURSO").contains(tipo)) throw erro(HttpStatus.BAD_REQUEST,"Categoria indisponível.");
+        if (!TIPOS_SEMANAIS.contains(tipo)) throw erro(HttpStatus.BAD_REQUEST,"Categoria indisponível.");
         String sql = """
             SELECT COUNT(*) total, COUNT(DISTINCT q.id_prova) edicoes
             FROM questao q JOIN prova p ON p.id_prova=q.id_prova
@@ -75,7 +76,7 @@ public class SimuladoDiarioRepository {
                         if (!r.next()) throw erro(HttpStatus.UNAUTHORIZED, "Entre novamente na sua conta.");
                         objetivo = r.getString("objetivo_prova");
                         if (objetivo == null) throw erro(HttpStatus.CONFLICT, "Escolha seu objetivo no painel antes de abrir um simulado.");
-                        if (!Set.of("ETEC","CONCURSO").contains(objetivo)) throw erro(HttpStatus.CONFLICT,
+                        if (!TIPOS_SEMANAIS.contains(objetivo)) throw erro(HttpStatus.CONFLICT,
                                 "Os simulados do seu objetivo estão em preparação. Para praticar ETEC, selecione ETEC no painel.");
                     }
                 }
