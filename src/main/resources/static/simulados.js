@@ -28,6 +28,12 @@ function pagina(p, q, container, foco, principal = false) {
   if (foco && q.conteudo.caixaTitulo) { const [x, y, x2, y2] = q.conteudo.caixaTitulo; const marker = element("span", undefined, "focus-marker"); marker.style.left = `${Math.max(0, (x - 7) / q.conteudo.larguraPagina * 100)}%`; marker.style.top = `${Math.max(0, (y - 5) / q.conteudo.alturaPagina * 100)}%`; marker.style.width = `${Math.max(100, x2 - x + 30) / q.conteudo.larguraPagina * 100}%`; marker.style.height = `${(y2 - y + 10) / q.conteudo.alturaPagina * 100}%`; stage.append(marker); }
   scroll.append(stage); container.append(label, scroll);
 }
+function caixaEtecValida(fragment) {
+  if (!Array.isArray(fragment.caixa) || fragment.caixa.length !== 4 || !fragment.caixa.every(Number.isFinite)) return false;
+  const [x,y,x2,y2] = fragment.caixa;
+  return Number.isFinite(fragment.larguraPagina) && Number.isFinite(fragment.alturaPagina)
+    && x >= 0 && y >= 0 && x2 > x && y2 > y && x2 <= fragment.larguraPagina && y2 <= fragment.alturaPagina;
+}
 function recortesOriginais(q, container) {
   const fragments = q.conteudo.recortes;
   if (!Array.isArray(fragments) || !fragments.length || !fragments.some(r => r.tipo === "questao")) {
@@ -36,8 +42,10 @@ function recortesOriginais(q, container) {
   }
   const scroll = element("div", undefined, "crop-scroll");
   for (const fragment of fragments) {
-    if (!/^\/questoes\/(concursos|enem)\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "")
+    const etec = /^\/questoes\/etec\/\d{4}-[12]\/pagina-\d+\.webp$/.test(fragment.imagem || "");
+    if ((!/^\/questoes\/(concursos|enem)\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "") && !etec)
         || !["apoio", "questao"].includes(fragment.tipo)) continue;
+    if (etec && !caixaEtecValida(fragment)) continue;
     if (fragment.imagem.startsWith("/questoes/enem/") && fragment.tipo === "apoio" && fragment.necessario !== true) continue;
     const card = element("section", undefined, "question-crop-card");
     if (Number.isFinite(fragment.larguraOriginal) && fragment.larguraOriginal > 0) {
@@ -49,7 +57,15 @@ function recortesOriginais(q, container) {
     img.alt = `${fragment.tipo === "apoio" ? "Texto de apoio da questão" : "Enunciado e alternativas da questão"} ${q.numeroOriginal}, ${q.prova}.`;
     img.loading = "lazy";
     img.onerror = () => { img.hidden = true; card.append(element("p", "Imagem indisponível. Consulte o caderno oficial.", "page-error")); };
-    card.append(img); scroll.append(card);
+    if (etec) {
+      const [x, y, x2, y2] = fragment.caixa, width = x2 - x, height = y2 - y;
+      const frame = element("div", undefined, "etec-crop-frame");
+      frame.style.aspectRatio = `${width} / ${height}`;
+      img.style.width = `${fragment.larguraPagina / width * 100}%`;
+      img.style.left = `${-x / width * 100}%`; img.style.top = `${-y / height * 100}%`;
+      frame.append(img); card.append(frame);
+    } else card.append(img);
+    scroll.append(card);
   }
   container.append(scroll);
 }

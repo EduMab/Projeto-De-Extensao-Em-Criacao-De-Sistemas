@@ -7,3 +7,6 @@
 
 /* Leitura individual dos simulados anteriores à importação dos recortes. */
 .legacy-question{--crop-width:650px;color:var(--ink);font-family:Arial,sans-serif}.legacy-question .question-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.65;margin:0 0 16px}.legacy-question .original-alternatives p{margin:0 0 12px}.legacy-question .original-alternatives p:last-child{margin-bottom:0}
+
+/* Janela proporcional sobre a imagem original: somente a questão e seu apoio ficam visíveis. */
+.etec-crop-frame{position:relative;overflow:hidden;width:100%;background:#fff}.question-crop-card .etec-crop-frame img{position:absolute;max-width:none;height:auto;display:block}

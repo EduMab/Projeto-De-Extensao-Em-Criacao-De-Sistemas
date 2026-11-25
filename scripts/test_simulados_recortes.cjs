@@ -40,3 +40,22 @@ for(const prova of antigos.provas)for(const original of prova.questoes){
  totalAntigas++;
 }
 console.log(`OK: ${totalAntigas} questões antigas preservam enunciados e alternativas na apresentação individual.`);
+const indiceEtec=JSON.parse(require('zlib').gunzipSync(fs.readFileSync('src/main/resources/etec-recortes.json.gz')));
+let exibidas=0;
+for(const [key,row] of Object.entries(indiceEtec)){
+ ctx.q={numeroOriginal:Number(key.split('/')[1]),prova:'ETEC '+key.split('/')[0],conteudo:{modo:'recorte_original',recortes:row.recortes}};
+ ctx.container=new Node('div');vm.runInContext('recortesOriginais(q,container)',ctx);
+ const cards=ctx.container.children[0].children;
+ assert.equal(cards.length,row.recortes.length,key);
+ cards.forEach((card,i)=>{
+  const frame=card.children[1],img=frame.children[0],p=row.recortes[i];
+  assert.equal(frame.className,'etec-crop-frame');assert.equal(img.src,p.imagem);
+  assert.equal(frame.style.aspectRatio,`${p.caixa[2]-p.caixa[0]} / ${p.caixa[3]-p.caixa[1]}`);
+  assert.equal(img.style.left,`${-p.caixa[0]/(p.caixa[2]-p.caixa[0])*100}%`);
+  assert.equal(img.style.top,`${-p.caixa[1]/(p.caixa[3]-p.caixa[1])*100}%`);
+ });exibidas++;
+}
+ctx.q.conteudo.recortes=[{tipo:'questao',imagem:'/questoes/etec/2026-2/pagina-15.webp',caixa:[0,0,600,100],larguraPagina:581,alturaPagina:751}];
+ctx.container=new Node('div');vm.runInContext('recortesOriginais(q,container)',ctx);assert.equal(ctx.container.children[0].children.length,0);
+const css=fs.readFileSync('src/main/resources/static/simulados.css','utf8');assert.match(css,/\.etec-crop-frame\{[^}]*overflow:hidden/);
+console.log(`OK: ${exibidas} questões ETEC em janelas proporcionais, imagens originais, rejeição de recortes fora da página.`);
