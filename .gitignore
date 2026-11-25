@@ -68,3 +68,6 @@ src/main/resources/static/questoes/concursos/pci-*/
 
 /.docker-build-cache/*
 !/.docker-build-cache/.gitkeep
+
+# FUVEST: páginas reproduzidas pelos PDFs oficiais no build e na preparação.
+src/main/resources/static/questoes/fuvest/

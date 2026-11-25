@@ -35,14 +35,27 @@ def source_path(year, day, kind):
 
 def download():
     WORK.mkdir(parents=True, exist_ok=True)
+    expected={}
+    sourcefile=ACERVO/'fontes-amarelo.json'
+    if sourcefile.exists():
+        for p in json.loads(sourcefile.read_text())['provas']:
+            expected[f"{p['ano']}-dia{p['dia']}.pdf"]=p['sha256Prova']
+            expected[f"{p['ano']}-gab{p['dia']}.pdf"]=p['sha256Gabarito']
     def one(task):
         year, day, kind = task
         p = WORK / f'{year}-{kind}{day}.pdf'
         if not p.exists():
             url = 'https://download.inep.gov.br/' + source_path(year, day, kind)
-            with urllib.request.urlopen(url, timeout=90) as response: data = response.read()
+            try:
+                with urllib.request.urlopen(url, timeout=45) as response: data = response.read()
+            except Exception:
+                # Transporte alternativo só é aceito com hash aprovado previamente.
+                if p.name not in expected:raise
+                with urllib.request.urlopen(url.replace('https://','http://',1),timeout=45) as response:data=response.read()
             if not data.startswith(b'%PDF'): raise ValueError(f'Fonte não é PDF: {url}')
+            if p.name in expected and hashlib.sha256(data).hexdigest()!=expected[p.name]:raise ValueError(f'Hash da fonte divergente: {p.name}')
             p.write_bytes(data)
+        if p.name in expected and hashlib.sha256(p.read_bytes()).hexdigest()!=expected[p.name]:raise ValueError(f'Hash da fonte divergente: {p.name}')
         return p.name
     tasks = [(y,d,k) for y in range(2017,2027) for d in (1,2) for k in ('dia','gab')]
     for name in concurrent.futures.ThreadPoolExecutor(6).map(one,tasks): print(name, flush=True)

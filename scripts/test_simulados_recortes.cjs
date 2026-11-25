@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
-class Node { constructor(tag){this.tagName=tag;this.children=[];this.style={setProperty(k,v){this[k]=v}};this.classList={toggle(){}};}append(...x){this.children.push(...x)}setAttribute(){}replaceChildren(...x){this.children=[...x]}scrollIntoView(){}}
+class Node { constructor(tag){this.tagName=tag;this.children=[];this.style={setProperty(k,v){this[k]=v}};this.classList={toggle(){}};}append(...x){this.children.push(...x)}setAttribute(){}replaceChildren(...x){this.children=[...x]}scrollIntoView(){}querySelector(){return new Node("legend")}}
 const ids=new Map(),document={getElementById(id){if(!ids.has(id))ids.set(id,new Node('div'));return ids.get(id)},createElement(tag){return new Node(tag)},querySelectorAll(){return []}};
 const ctx=vm.createContext({document,window:{location:{replace(){}}},fetch:async()=>({status:401}),localStorage:{clear(){}},console});
 vm.runInContext(fs.readFileSync('src/main/resources/static/simulados.js','utf8'),ctx);

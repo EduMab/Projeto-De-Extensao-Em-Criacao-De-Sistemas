@@ -280,3 +280,9 @@ atual, incluindo o apoio necessário, em proporção original e com controle de 
 
 Consulte [fontes, recortes e substituição do catálogo](acervo/concursos/README_RECORTES.md).
 A carga anterior permanece arquivada para auditoria e para consulta de históricos.
+
+## Simulados semanais FUVEST
+
+A 1ª fase da FUVEST tem dez edições disponíveis no catálogo de 2018 a 2027,
+com 886 questões aptas para simulados semanais de 40 questões. Veja as fontes,
+a importação e o fluxo do estudante em [FUVEST no Evolua+](doc/FUVEST_E_SIMULADOS.md).

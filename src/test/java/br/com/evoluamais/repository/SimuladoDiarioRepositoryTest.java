@@ -103,10 +103,50 @@ class SimuladoDiarioRepositoryTest {
         assertFalse(acervo.containsKey("questoesPorDia"));
         assertFalse(acervo.containsKey("diasCom40Ineditas"));
     }
-    @Test void exigeObjetivoETECETrocarNaoApagaNemAntecipaSimulado() throws Exception {
+
+    private void prepararEnem() throws Exception {
+        try(var c=DriverManager.getConnection(url);var s=c.createStatement()) {
+            s.execute("UPDATE estudante SET objetivo_prova='ENEM'");
+            s.execute("INSERT INTO prova VALUES(5,'ENEM amarelo','ENEM-2026-DIA-1-AMARELO','2026','ENEM','VALIDADA')");
+            for(int i=1;i<=45;i++) {
+                int id=1000+i;String idioma=i<=5?"INGLES":i<=10?"ESPANHOL":null;
+                int numero=i<=5?i:i<=10?90+i-5:i-5;
+                String conteudo="{\"modo\":\"recorte_original\",\"numeroOriginal\":"+(i<=10?(i-1)%5+1:numero)+",\"idioma\":"+(idioma==null?"null":"\""+idioma+"\"")+",\"recortes\":[]}";
+                try(var insert=c.prepareStatement("INSERT INTO questao VALUES(?,5,?,'Original ENEM',0,?)")) {
+                    insert.setInt(1,id);insert.setInt(2,numero);insert.setString(3,conteudo);insert.executeUpdate();
+                }
+                for(int a=0;a<5;a++)s.execute("INSERT INTO alternativa VALUES("+(id*10+a)+","+id+",'"+(char)('A'+a)+"','Alternativa',"+(a==0?1:0)+")");
+            }
+        }
+    }
+
+    @Test void enemFiltraIdiomaPreservaNumeroImpressoERetomaSemNovoSorteio() throws Exception {
+        prepararEnem();
+        var ingles=repo.iniciar(1,hoje,"INGLES");
+        assertEquals("INGLES",ingles.get("idioma"));assertEquals(40,questoes(ingles).size());
+        assertTrue(questoes(ingles).stream().noneMatch(q->q.path("conteudo").path("idioma").asText().equals("ESPANHOL")));
+        assertEquals(ingles,repo.iniciar(1,hoje.plusDays(6),"ESPANHOL"));
+        var espanhol=repo.iniciar(2,hoje,"ESPANHOL");
+        assertEquals("ESPANHOL",espanhol.get("idioma"));
+        var estrangeiras=questoes(espanhol).stream().filter(q->q.path("conteudo").path("idioma").asText().equals("ESPANHOL")).toList();
+        assertEquals(5,estrangeiras.size());
+        assertEquals(Set.of(1,2,3,4,5),estrangeiras.stream().map(q->q.path("numeroOriginal").asInt()).collect(java.util.stream.Collectors.toSet()));
+        assertEquals("ESPANHOL",repo.iniciar(1,hoje.plusWeeks(1),"ESPANHOL").get("idioma"));
+        assertEquals(2,repo.historico(1).size());assertEquals(1,repo.historico(2).size());
+    }
+
+    @Test void acervoEnemContaEdicoesEUmIdiomaPorVez() throws Exception {
+        prepararEnem();
+        assertEquals(40,repo.acervo("ENEM","INGLES").get("questoesAtivas"));
+        assertEquals(40,repo.acervo("ENEM","ESPANHOL").get("questoesAtivas"));
+        assertEquals(1,repo.acervo("ENEM").get("edicoes"));
+        assertEquals(400,assertThrows(ResponseStatusException.class,()->repo.iniciar(1,hoje,"TODOS")).getStatusCode().value());
+        assertTrue(repo.historico(1).isEmpty());
+    }
+    @Test void objetivosIndisponiveisNaoApagamNemAntecipamSimulado() throws Exception {
         var primeiro = repo.iniciar(1,hoje);
         long id = ((Number)primeiro.get("id")).longValue();
-        for (String objetivo : new String[]{null,"ENEM","FUVEST"}) {
+        for (String objetivo : new String[]{null,"ENEM"}) {
             try (var c=DriverManager.getConnection(url);var s=c.prepareStatement("UPDATE estudante SET objetivo_prova=? WHERE id_estudante=1")) {
                 s.setString(1,objetivo);s.executeUpdate();
             }
@@ -116,6 +156,24 @@ class SimuladoDiarioRepositoryTest {
         }
         try(var c=DriverManager.getConnection(url);var s=c.createStatement()){s.execute("UPDATE estudante SET objetivo_prova='ETEC' WHERE id_estudante=1");}
         assertEquals(primeiro,repo.iniciar(1,hoje.plusDays(6)));
+    }
+    @Test void fuvestGera40QuestoesSemAnuladasOuGabaritoMultiplo() throws Exception {
+        var etec = repo.iniciar(1, hoje);
+        try (var c = DriverManager.getConnection(url); var s = c.createStatement()) {
+            s.execute("UPDATE estudante SET objetivo_prova='FUVEST' WHERE id_estudante=1");
+            s.execute("UPDATE prova SET tipo='FUVEST' WHERE id_prova IN (1,2,3)");
+            s.execute("UPDATE questao SET anulada=1 WHERE id_questao=1");
+            s.execute("UPDATE alternativa SET correta=1 WHERE id_questao=2 AND letra='B'");
+            s.execute("DELETE FROM alternativa WHERE id_questao=3 AND letra='E'");
+        }
+        assertEquals(57, repo.acervo("FUVEST").get("questoesAtivas"));
+        var fuvest = repo.iniciar(1, hoje);
+        assertEquals("FUVEST", fuvest.get("tipo"));
+        assertNotEquals(etec.get("id"), fuvest.get("id"));
+        assertEquals(40, ids(fuvest).size());
+        assertTrue(ids(fuvest).stream().allMatch(id -> id >= 4 && id <= 60));
+        assertEquals(fuvest, repo.iniciar(1, hoje.plusDays(6)));
+        assertNotEquals(fuvest.get("id"), repo.iniciar(1, hoje.plusDays(7)).get("id"));
     }
     @Test void verificaDonoAlternativaEConclusaoECalculaNotaComSnapshot() throws Exception {
         var simulado=repo.iniciar(1,hoje);long id=((Number)simulado.get("id")).longValue();var qs=questoes(simulado);

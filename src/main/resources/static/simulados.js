@@ -1,5 +1,6 @@
 "use strict";
 const $ = id => document.getElementById(id);
+const categorias = { ENEM: "ENEM", ETEC: "ETEC", CONCURSO: "Concurso público", FUVEST: "FUVEST" };
 let simulado = null, indice = 0, ocupado = false, objetivo = "ETEC";
 function element(tag, text, className) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
 function aviso(text) { $("mensagem").textContent = text; $("mensagem").hidden = !text; }
@@ -17,11 +18,11 @@ function progresso() {
   $("numeros").replaceChildren();
   simulado.questoes.forEach((q, i) => { const b = element("button", String(i + 1), (q.alternativaSelecionada !== null ? "done " : "") + (indice === i ? "active" : "")); b.type = "button"; b.setAttribute("aria-label", `Questão ${i + 1}${q.alternativaSelecionada !== null ? ", respondida" : ""}`); if (indice === i) b.setAttribute("aria-current", "step"); b.onclick = () => { if (!ocupado) { indice = i; mostrar(); $("titulo").scrollIntoView({ block: "start", behavior: "smooth" }); } }; $("numeros").append(b); });
 }
-function pagina(p, q, container, foco) {
-  if (!p.imagem?.startsWith("/questoes/etec/")) return;
-  const label = element("p", `Página ${p.numero} do caderno original${foco ? " · questão indicada em roxo" : " · apoio"}`, "page-label");
+function pagina(p, q, container, foco, principal = false) {
+  if (!/^\/questoes\/(etec|fuvest)\/[a-z0-9-]+\/pagina-\d+\.webp$/.test(p.imagem || "")) return;
+  const label = element("p", `Página ${p.numero} do caderno original${foco ? " · questão indicada em roxo" : principal && p.numero > q.conteudo.pagina ? " · página seguinte" : " · apoio"}`, "page-label");
   const scroll = element("div", undefined, "page-scroll"), stage = element("div", undefined, "page-stage");
-  const image = element("img"); image.src = p.imagem; image.alt = `ETEC ${q.edicao}, página ${p.numero}. Responda a questão original ${q.numeroOriginal}.`; image.loading = "lazy";
+  const image = element("img"); image.src = p.imagem; image.alt = `${q.prova}, página ${p.numero}.${foco ? ` Questão original ${q.numeroOriginal}.` : ""}`; image.loading = "lazy";
   image.onerror = () => { image.hidden = true; stage.append(element("p", "Página indisponível. Use o link para abrir o caderno oficial.", "page-error")); };
   stage.append(image);
   if (foco && q.conteudo.caixaTitulo) { const [x, y, x2, y2] = q.conteudo.caixaTitulo; const marker = element("span", undefined, "focus-marker"); marker.style.left = `${Math.max(0, (x - 7) / q.conteudo.larguraPagina * 100)}%`; marker.style.top = `${Math.max(0, (y - 5) / q.conteudo.alturaPagina * 100)}%`; marker.style.width = `${Math.max(100, x2 - x + 30) / q.conteudo.larguraPagina * 100}%`; marker.style.height = `${(y2 - y + 10) / q.conteudo.alturaPagina * 100}%`; stage.append(marker); }
@@ -35,8 +36,9 @@ function recortesOriginais(q, container) {
   }
   const scroll = element("div", undefined, "crop-scroll");
   for (const fragment of fragments) {
-    if (!/^\/questoes\/concursos\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "")
+    if (!/^\/questoes\/(concursos|enem)\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "")
         || !["apoio", "questao"].includes(fragment.tipo)) continue;
+    if (fragment.imagem.startsWith("/questoes/enem/") && fragment.tipo === "apoio" && fragment.necessario !== true) continue;
     const card = element("section", undefined, "question-crop-card");
     if (Number.isFinite(fragment.larguraOriginal) && fragment.larguraOriginal > 0) {
       card.style.setProperty("--crop-width", `${Math.min(650, Math.max(400, fragment.larguraOriginal * 1.3))}px`);
@@ -72,12 +74,12 @@ function mostrar() {
   if (!simulado) return; const q = simulado.questoes[indice];
   $("inicio").hidden = true; $("estudo").hidden = false;
   $("periodo").hidden = false;
-  $("periodo").textContent = `Seleção aberta em ${formatDate(simulado.data)} · Intervalo de sete dias até ${formatDate(simulado.proximaLiberacao)}, no horário de Brasília. Consulte e continue os simulados anteriores pelo histórico.`;
-  $("fonte").textContent = q.prova; $("titulo").textContent = `Questão ${indice + 1}`;
+  $("periodo").textContent = `Seleção aberta em ${formatDate(simulado.data)}${simulado.tipo === "ENEM" ? " · " + (simulado.idioma === "ESPANHOL" ? "Espanhol" : "Inglês") : ""} · Intervalo de sete dias até ${formatDate(simulado.proximaLiberacao)}, no horário de Brasília. Consulte e continue os simulados anteriores pelo histórico.`;
+  $("fonte").textContent = q.prova + (q.conteudo.idioma ? " · " + (q.conteudo.idioma === "ESPANHOL" ? "Espanhol" : "Inglês") : ""); $("titulo").textContent = `Questão ${indice + 1}`;
   $("posicao").textContent = `${indice + 1} / 40`; $("questaoOriginal").textContent = `Responda a questão ${String(q.numeroOriginal).padStart(2, "0")} da edição ${q.edicao}.`;
-  const url = q.conteudo.pdf || q.conteudo.urlProva; $("provaOriginal").href = (url?.startsWith("https://") || url?.startsWith("/questoes/concursos/")) ? url : "https://www.cps.sp.gov.br/etec/vestibulinho/";
+  const url = q.conteudo.pdf || q.conteudo.urlProva; $("provaOriginal").href = (url?.startsWith("https://") || /^\/questoes\/(concursos|enem)\//.test(url || "")) ? url : objetivo === "FUVEST" ? "https://www.fuvest.br/acervo-vestibular/" : "https://www.cps.sp.gov.br/etec/vestibulinho/";
   $("paginas").replaceChildren(); $("paginasApoio").replaceChildren(); $("apoio").open = false;
-  (q.conteudo.paginas || []).forEach(p => pagina(p, q, $("paginas"), p.numero === q.conteudo.pagina));
+  (q.conteudo.paginas || []).forEach(p => pagina(p, q, $("paginas"), p.numero === q.conteudo.pagina, true));
   (q.conteudo.apoioAnterior || []).forEach(p => pagina(p, q, $("paginasApoio"), false));
   $("apoio").hidden = !q.conteudo.apoioAnterior?.length;
   const recortada = q.conteudo.modo === "recorte_original";
@@ -92,6 +94,7 @@ function mostrar() {
     questaoIndividual(q, $("paginas"));
   }
   $("opcoes").replaceChildren();
+  $("respostas").querySelector("legend").textContent = "Qual alternativa você escolhe?";
   q.alternativas.forEach(a => { const label = element("label", undefined, "option"), input = element("input"), text = element("span", a.letra); input.type = "radio"; input.name = "alternativa"; input.value = a.id; input.checked = q.alternativaSelecionada === a.id; input.setAttribute("aria-label", `Alternativa ${a.letra}`); input.onchange = () => salvar(q, a.id); label.append(input, text); $("opcoes").append(label); });
   $("correcao").hidden = !simulado.concluido;
   if (simulado.concluido) $("correcao").textContent = `${q.acertou ? "Você acertou." : "Você errou."} ${q.conteudo.gabaritoPreliminar ? "Gabarito preliminar da fonte" : "Gabarito oficial"}: alternativa ${q.gabarito}.`;
@@ -116,9 +119,35 @@ async function historico() {
     rows.forEach(row => { const line = element("div", undefined, "history-row"), text = element("div"), button = element("button", row.concluido ? "Revisar" : "Continuar", "secondary"); text.append(element("strong", `${row.tipo || "ETEC"} · ${formatDate(row.data)}`), element("span", row.concluido ? `${row.acertos}/40 acertos · Concluído` : `${row.respondidas}/40 respondidas · Em andamento`)); button.type = "button"; button.onclick = async () => { if (ocupado) return; try { simulado = await api(`/${row.id}`); indice = 0; aviso(""); resultado(); mostrar(); $("estudo").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (error) { aviso(error.message); } }; line.append(text, button); $("historico").append(line); });
   } catch (error) { if (error.status === 401) { $("historico").replaceChildren(element("a", "Entrar para ver meu histórico")); $("historico").firstChild.href = "/login.html"; } else aviso(error.message); }
 }
+function escolherIdiomaEnem() {
+  return new Promise(resolve => {
+    $("inicio").hidden = true; $("estudo").hidden = false;
+    $("fonte").textContent = "ENEM"; $("titulo").textContent = "Escolha a língua estrangeira";
+    $("posicao").textContent = "Antes de começar";
+    $("questaoOriginal").textContent = "Inglês ou Espanhol";
+    $("notaOriginal").textContent = "O sorteio incluirá somente o idioma escolhido. Uma tentativa já aberta mantém seu idioma e suas respostas.";
+    $("paginas").replaceChildren(); $("paginasApoio").replaceChildren(); $("apoio").hidden = true;
+    $("correcao").hidden = true; $("respostas").disabled = false;
+    $("respostas").querySelector("legend").textContent = "Qual língua estrangeira você escolhe?";
+    $("provaOriginal").href = "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos";
+    $("opcoes").replaceChildren(); $("numeros").replaceChildren();
+    $("anterior").disabled = true; $("finalizar").disabled = true;
+    const proxima=$("proxima"), anteriorHandler=proxima.onclick;
+    proxima.disabled=true; proxima.textContent="Começar →";
+    let escolha=null;
+    for(const [valor,nome] of [["INGLES","Inglês"],["ESPANHOL","Espanhol"]]) {
+      const label=element("label",undefined,"option"), input=element("input");
+      input.type="radio"; input.name="idiomaEnem"; input.value=valor;
+      input.onchange=()=>{escolha=valor;proxima.disabled=false;};
+      label.append(input,element("span",nome)); $("opcoes").append(label);
+    }
+    proxima.onclick=()=>{if(!escolha)return;proxima.onclick=anteriorHandler;proxima.textContent="Próxima →";resolve(escolha);};
+  });
+}
 $("comecar").onclick = async () => { if (ocupado) return; ocupado = true; $("comecar").disabled = true; $("comecar").textContent = "Preparando suas questões…"; aviso("");
-  try { simulado = await api("/atual", "POST"); indice = Math.max(0, simulado.questoes.findIndex(q => q.alternativaSelecionada === null)); resultado(); mostrar(); await historico(); }
-  catch (error) { if (error.status === 401) { window.location.href = "/login.html"; return; } aviso(error.message); }
+  try { const idioma = objetivo === "ENEM" ? await escolherIdiomaEnem() : null;
+    simulado = await api("/atual" + (idioma ? "?idioma=" + idioma : ""), "POST"); indice = Math.max(0, simulado.questoes.findIndex(q => q.alternativaSelecionada === null)); resultado(); mostrar(); await historico(); }
+  catch (error) { if (error.status === 401) { window.location.href = "/login.html"; return; } $("inicio").hidden = false; $("estudo").hidden = true; aviso(error.message); }
   finally { ocupado = false; $("comecar").disabled = false; $("comecar").textContent = "Abrir simulado da semana →"; }
 };
 $("anterior").onclick = () => { if (!ocupado && indice > 0) { indice--; mostrar(); } };
@@ -136,9 +165,13 @@ async function inicializar() {
     if (response.status === 401) { window.location.replace("/login.html"); return; }
     if (!response.ok) throw new Error("Não foi possível carregar seu objetivo. Atualize a página para tentar novamente.");
     const perfil = await response.json();
-    if (!["ETEC", "CONCURSO"].includes(perfil.objetivo)) { window.location.replace("/index.html"); return; }
+    if (!Object.hasOwn(categorias, perfil.objetivo)) { window.location.replace("/index.html"); return; }
     objetivo = perfil.objetivo;
-    document.querySelectorAll("[data-categoria]").forEach(n => n.textContent = objetivo === "CONCURSO" ? "Concurso público" : "ETEC");
+    if(objetivo === "ENEM") {
+      const footer=document.querySelector("main > footer");
+      if(footer?.firstChild)footer.firstChild.textContent="Questões e gabaritos: acervo oficial do INEP. Questões anuladas ficam fora da seleção.";
+    }
+    document.querySelectorAll("[data-categoria]").forEach(n => n.textContent = categorias[objetivo]);
     $("comecar").disabled = false;
     await Promise.allSettled([
       api("/acervo?tipo=" + encodeURIComponent(objetivo)).then(data => { $("acervoTotal").textContent = data.questoesAtivas; $("acervoEdicoes").textContent = data.edicoes; }).catch(error => aviso(error.message)),

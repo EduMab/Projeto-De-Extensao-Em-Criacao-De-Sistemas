@@ -1,4 +1,4 @@
-# ENEM amarelo — prévia para revisão
+# ENEM amarelo — integração no layout existente
 
 Escopo confirmado por Eduardo: **10 edições completas (2017–2026), 20 cadernos
 físicos, ambos os dias da aplicação regular**, cadernos 2 e 5 amarelos.
@@ -6,17 +6,21 @@ Os PDFs e gabaritos vêm do domínio oficial `download.inep.gov.br`.
 
 ## Estado
 
-**PREVIA_NAO_APROVADA. Nenhuma publicação, habilitação de ENEM ou escrita no banco
-foi realizada por esta preparação.** O acervo será integrado após a revisão da
-prévia solicitada por Eduardo. Não executar os importadores de concurso para
-este acervo: o contrato ENEM tem idioma e numeração original próprios.
+Eduardo aprovou as questões da prévia e determinou a preservação integral do
+layout atual e das mesmas imagens. A integração usa `simulados.html` e
+`simulados.css` existentes, sem modificá-los. A moldura da prévia é ilustrativa
+e não é publicada. `aprovacao.json` fixa o conteúdo; `imagens-aprovadas.json`
+fixa os 2.002 recortes aprovados por SHA-256. O rótulo de prévia no dataset é
+mantido para conservar seus bytes; a autorização fica no manifesto separado.
+Não executar os importadores de concurso para este acervo: o contrato ENEM
+tem idioma e numeração original próprios.
 
 - 1.850 questões distintas, incluindo as 50 versões adicionais de espanhol.
 - 1.839 não anuladas considerando os dois idiomas no acervo.
 - 1.789 não anuladas para cada escolha de idioma (Inglês ou Espanhol).
 - 9.250 alternativas; 11 anuladas preservadas, fora do sorteio final.
 - 20 cadernos físicos, sem duplicar as 85 questões comuns de cada primeiro dia.
-- Simulado pretendido: 40 questões por semana, retomada, correção e histórico,
+- Simulado integrado: 40 questões por semana, retomada, correção e histórico,
   com escolha de idioma, no mesmo padrão visual dos concursos.
 - Percentual de acertos para treino; não reproduz TRI nem corrige redação.
 
@@ -52,7 +56,9 @@ relativos seguros em `questoes/enem/`.
 Em cada primeiro dia, a numeração interna 1–90 corresponde a Inglês e questões
 comuns; 91–95 identifica as cinco questões de Espanhol. O número impresso é
 preservado em `numeroOriginal` e `conteudo.numeroOriginal` (1–5 em ambos os
-idiomas). A seleção final precisa filtrar `idioma` e exibir o número impresso.
+idiomas). A seleção filtra `idioma` e exibe o número impresso. Uma tentativa já aberta
+mantém o idioma congelado, as perguntas e as respostas, mesmo que seja
+solicitado outro idioma durante os sete dias.
 
 ## Reproduzir e verificar
 
@@ -63,10 +69,30 @@ python -m unittest discover -s scripts -p test_enem_amarelo.py -v
 python scripts/gerar_previa_enem.py
 ```
 
-Dependências da preparação: Python 3, PyMuPDF e Pillow; ReportLab para PDF da
-prévia. O gerador não lê credenciais nem conecta ao banco.
+Dependências fixadas em `scripts/requirements-enem.txt`; ReportLab apenas
+para o PDF ilustrativo. Os geradores não leem credenciais nem conectam ao banco.
 
-As validações automáticas não substituem a revisão editorial dos recortes.
-Para aprovação, conferir a prévia visual e os casos de apoio, figuras e
-continuação. Só depois preparar a publicação e a carga ENEM isolada,
-transacional e idempotente, preservando todas as outras categorias e históricos.
+## Publicação e carga
+
+O Docker e a CI reproduzem os recursos a partir dos PDFs oficiais com hashes
+fixados. Downloads por HTTP só são aceitos quando coincidem com o SHA-256
+aprovado. A conferência rejeita qualquer alteração dos recortes da prévia.
+
+O workflow `importar-enem.yml` testa o acervo, o front-end, o Java e a carga
+em MySQL 8 isolado. Em `main`, a carga usa somente as credenciais existentes
+do ambiente GitHub `enem`, sem definir segredos ou ampliar permissões.
+O alvo é o MySQL do projeto Railway
+`17289eb2-f99d-4bef-a828-3baab021fc4e`, ambiente
+`c94f6079-c405-4327-9aeb-7a3ea8a6bf10`, serviço
+`030ce092-113d-4338-aa8a-2e91a604f8f5`.
+A função `PreparacaoBanco` não é alterada nem reimplantada por esta rotina.
+
+Antes de ler credenciais/conectar, `importar_enem.py --aplicar` confere o JS
+publicado no Render e as 2.002 imagens. Faz simulação revertida, carga em uma
+transação e reexecução com zero questões novas. Rejeita dados existentes que
+divergem, sem sobrescrevê-los. Não exclui provas e não escreve em usuários,
+respostas ou snapshots. Testes conferem a preservação desses registros.
+
+A disponibilidade ENEM no perfil só é habilitada quando os 20 cadernos estiverem
+validados. Falta de credenciais, aprovação do ambiente, divergência de fonte ou
+publicação pendente bloqueia a carga; não é motivo para alterar as permissões.

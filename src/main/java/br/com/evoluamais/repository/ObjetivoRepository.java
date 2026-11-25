@@ -49,6 +49,10 @@ public class ObjetivoRepository {
             s.setInt(1, estudante);
             try (var r = s.executeQuery()) {
                 if (!r.next()) throw semConta();
+                boolean enemPronto;
+                try(var preparo=c.prepareStatement("SELECT COUNT(*) n FROM prova WHERE tipo='ENEM' AND status_importacao='VALIDADA' AND ano BETWEEN 2017 AND 2026 AND codigo LIKE 'ENEM-%-DIA-%-AMARELO'");var catalogo=preparo.executeQuery()){
+                    catalogo.next();enemPronto=catalogo.getInt("n")==20;
+                }
                 var perfil = new LinkedHashMap<String, Object>();
                 perfil.put("idEstudante", r.getInt("id_estudante"));
                 perfil.put("idProva", r.getInt("id_prova"));
@@ -56,7 +60,7 @@ public class ObjetivoRepository {
                 perfil.put("objetivo", r.getString("objetivo_prova"));
                 perfil.put("objetivos", Arrays.stream(ObjetivoProva.values()).map(o -> Map.of(
                         "codigo", o.name(), "nome", o.nome(), "descricao", o.descricao(),
-                        "simuladoDisponivel", o.simuladoDisponivel())).toList());
+                        "simuladoDisponivel", o.simuladoDisponivel() && (o!=ObjetivoProva.ENEM || enemPronto))).toList());
                 String chave = System.getenv("OPENROUTER_API_KEY");
                 perfil.put("iaDisponivel", chave != null && !chave.isBlank());
                 return perfil;
