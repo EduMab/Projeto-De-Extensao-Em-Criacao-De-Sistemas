@@ -1,6 +1,6 @@
 import copy,json,os,unittest
 from pathlib import Path
-from atualizar_recortes_concursos import conjuntos,migrar,ImportacaoError,ROOT,canon
+from atualizar_recortes_concursos import conjuntos,migrar,ImportacaoError,ROOT,canon,comparar,diferencas_json
 
 @unittest.skipUnless(os.getenv('RUN_MYSQL_TESTS')=='1','Exige MySQL isolado de teste')
 class RevisaoTest(unittest.TestCase):
@@ -39,6 +39,7 @@ class RevisaoTest(unittest.TestCase):
   with self.conn.cursor() as c:
    for table in ['usuario','estudante','resposta','simulado_diario','simulado_diario_questao','alternativa','prova','questao']:
     c.execute('SELECT * FROM '+table);result[table]=c.fetchall()
+  self.conn.rollback()
   return canon(result)
  def test_simular_aplicar_repetir_reverter_preserva_todos_os_ids_e_historicos(self):
   before=self.estado();self.assertEqual(migrar(self.conn,self.old,self.new)['status'],'SIMULACAO_REVERTIDA');self.assertEqual(before,self.estado())
@@ -58,4 +59,31 @@ class RevisaoTest(unittest.TestCase):
    c.execute(f"CREATE TRIGGER falha_revisao BEFORE UPDATE ON questao FOR EACH ROW BEGIN IF NEW.id_questao={last} THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Falha deliberada de teste'; END IF; END")
   with self.assertRaises(Exception):migrar(self.conn,self.old,self.new,True)
   self.assertEqual(before,self.estado())
+ def test_json_serializado_como_javascript_e_comparado_antes_de_atualizar(self):
+  def js(v):
+   if isinstance(v,float) and v.is_integer():return int(v)
+   if isinstance(v,list):return [js(x) for x in v]
+   if isinstance(v,dict):return {k:js(x) for k,x in v.items()}
+   return v
+  with self.conn.cursor() as cur:
+   cur.execute('SELECT id_questao,conteudo_json FROM questao WHERE conteudo_json IS NOT NULL')
+   for row in cur.fetchall():cur.execute('UPDATE questao SET conteudo_json=%s WHERE id_questao=%s',(json.dumps(js(json.loads(row['conteudo_json'])),ensure_ascii=False),row['id_questao']))
+  self.conn.commit();before=self.estado();result=comparar(self.conn,self.old,self.new)
+  self.assertEqual(result['status'],'OK');self.assertEqual(result['originaisEquivalentes'],364);self.assertGreater(result['diferencasApenasRepresentacao'],0);self.assertEqual(before,self.estado())
+  self.assertEqual(migrar(self.conn,self.old,self.new,True)['atualizadas'],364)
+  self.assertEqual(migrar(self.conn,self.old,self.new,True)['atualizadas'],0)
+ def test_coordenada_diferente_com_hash_original_continua_bloqueada(self):
+  with self.conn.cursor() as cur:
+   cur.execute("SELECT id_questao,conteudo_json FROM questao WHERE conteudo_json IS NOT NULL ORDER BY id_questao LIMIT 1");row=cur.fetchone();content=json.loads(row['conteudo_json']);content['recortes'][0]['caixa'][0]+=.001
+   cur.execute('UPDATE questao SET conteudo_json=%s WHERE id_questao=%s',(json.dumps(content),row['id_questao']))
+  self.conn.commit();before=self.estado();report=comparar(self.conn,self.old,self.new)
+  self.assertEqual(report['status'],'DIVERGENTE');self.assertIn('$.recortes[0].caixa[0]',report['divergenciasReais'][0]['camposDivergentesOriginal'])
+  with self.assertRaises(ImportacaoError):migrar(self.conn,self.old,self.new,True)
+  self.assertEqual(before,self.estado())
+
+class JsonEquivalenteTest(unittest.TestCase):
+ def test_ignora_so_representacao_numerica(self):
+  self.assertEqual(diferencas_json({'a':[56.0,1e1]}, {'a':[56,10]}),[])
+  for a,b in [(False,0),(True,1),(56,'56'),([1,2],[2,1]),({'a':1},{'a':1,'b':2}),(56,56.001),('texto','texto '),(None,False)]:self.assertTrue(diferencas_json(a,b),(a,b))
+
 if __name__=='__main__':unittest.main()

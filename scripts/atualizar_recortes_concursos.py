@@ -1,6 +1,7 @@
 """Atualiza só conteudo_json/hash_fonte dos mesmos IDs; reversível e idempotente."""
 import argparse,concurrent.futures,gzip,hashlib,json,os,re,urllib.request,zipfile
 from pathlib import Path
+from decimal import Decimal
 from importar_concursos import ImportacaoError,configuracao,validar_schema
 from empacotar_revisao_concursos import validar
 ROOT=Path(__file__).resolve().parents[1]
@@ -8,6 +9,41 @@ ORIGINAL=ROOT/'acervo/concursos/questoes-recortadas.json.gz'
 SOURCE_SHA='ffba2ee124765ceab6fc166b9547047a6383a75355999b90261e85df30806372'
 LOCKS=['evolua_concursos_importacao','evolua_concursos_questoes']
 def canon(v):return json.dumps(v,ensure_ascii=False,sort_keys=True,separators=(',',':'),default=str)
+def diferencas_json(a,b,path='$'):
+ # JSON possui um único tipo numérico. Booleanos nunca são aceitos como números.
+ if isinstance(a,bool) or isinstance(b,bool):return [] if type(a) is type(b) and a==b else [path]
+ if isinstance(a,(int,float,Decimal)) and isinstance(b,(int,float,Decimal)):
+  return [] if Decimal(str(a)).is_finite() and Decimal(str(b)).is_finite() and Decimal(str(a))==Decimal(str(b)) else [path]
+ if type(a) is not type(b):return [path]
+ if isinstance(a,dict):
+  paths=[path+'.'+str(k) for k in sorted(set(a)^set(b))]
+  for k in sorted(set(a)&set(b)):paths.extend(diferencas_json(a[k],b[k],path+'.'+str(k)))
+  return paths
+ if isinstance(a,list):
+  if len(a)!=len(b):return [path]
+  return [p for i,(x,y) in enumerate(zip(a,b)) for p in diferencas_json(x,y,path+'['+str(i)+']')]
+ return [] if a==b else [path]
+
+def comparar(conn,old,new):
+ # Diagnóstico em transação somente leitura; não registra credenciais ou dados pessoais.
+ reports=[]
+ with conn.cursor() as cur:
+  cur.execute('SET TRANSACTION READ ONLY');conn.begin()
+  try:
+   for p,n in zip(old['provas'],new['provas'],strict=True):
+    cur.execute('SELECT q.numero_original,q.hash_fonte,q.conteudo_json FROM questao q JOIN prova p ON p.id_prova=q.id_prova WHERE p.codigo=%s ORDER BY q.numero_original',(p['codigo'],))
+    rows=cur.fetchall()
+    if len(rows)!=len(p['questoes']):raise ImportacaoError('Comparação: quantidade divergente em '+p['codigo'])
+    for row,a,b in zip(rows,p['questoes'],n['questoes'],strict=True):
+     if row['numero_original']!=a['numero']:raise ImportacaoError('Comparação: numeração divergente.')
+     current=json.loads(row['conteudo_json']);original=diferencas_json(current,a['conteudo']);revisado=diferencas_json(current,b['conteudo'])
+     state='original' if row['hash_fonte']==a['hashFonte'] and not original else 'revisado' if row['hash_fonte']==b['hashFonte'] and not revisado else 'divergente'
+     representation=state=='original' and canon(current)!=canon(a['conteudo'])
+     reports.append({'prova':p['codigo'],'questao':a['numero'],'estado':state,'hashOriginalConfere':row['hash_fonte']==a['hashFonte'],'hashRevisadoConfere':row['hash_fonte']==b['hashFonte'],'somenteRepresentacaoNumerica':representation,'camposDivergentesOriginal':original[:12],'camposDivergentesRevisado':revisado[:12]})
+   result={'status':'OK' if all(r['estado']!='divergente' for r in reports) else 'DIVERGENTE','operacao':'COMPARACAO_CONCURSOS_SOMENTE_LEITURA','questoes':len(reports),'originaisEquivalentes':sum(r['estado']=='original' for r in reports),'revisadasEquivalentes':sum(r['estado']=='revisado' for r in reports),'diferencasApenasRepresentacao':sum(r['somenteRepresentacaoNumerica'] for r in reports),'divergenciasReais':[r for r in reports if r['estado']=='divergente'],'primeiraQuestao':reports[0]}
+   return result
+  finally:conn.rollback()
+
 def conjuntos():
  if hashlib.sha256(ORIGINAL.read_bytes()).hexdigest()!=SOURCE_SHA:raise ImportacaoError('Acervo original divergente.')
  old=json.loads(gzip.decompress(ORIGINAL.read_bytes()));new,_=validar()
@@ -71,7 +107,7 @@ def migrar(conn,old,new,aplicar=False,reverter=False):
       if row['numero_original']!=number or row['enunciado']!=a['enunciado'] or bool(row['anulada'])!=a['anulada']:raise ImportacaoError(f'Questão existente divergente: {p["codigo"]}/{number}')
       current=json.loads(row['conteudo_json']);state=None
       for label,q in [('original',a),('revisado',b)]:
-       if row['hash_fonte']==q['hashFonte'] and canon(current)==canon(q['conteudo']):state=label
+       if row['hash_fonte']==q['hashFonte'] and not diferencas_json(current,q['conteudo']):state=label
       if state is None:raise ImportacaoError(f'Hash/conteúdo existente divergente: {p["codigo"]}/{number}')
       cur.execute('SELECT letra,texto,correta FROM alternativa WHERE id_questao=%s ORDER BY letra',(qid,))
       if [(r['letra'],r['texto'],bool(r['correta'])) for r in cur.fetchall()]!=[(r['letra'],r['texto'],r['letra']==a['gabarito']) for r in a['alternativas']]:raise ImportacaoError('Alternativas/gabarito existentes divergentes.')
@@ -108,6 +144,9 @@ def main():
   if (conf['host'],conf['port'],conf['database'])!=('thomas.proxy.rlwy.net',23871,'evoluamais'):raise ImportacaoError('Alvo diferente do MySQL Railway aprovado.')
   import pymysql
   with pymysql.connect(**conf,cursorclass=pymysql.cursors.DictCursor) as conn:
+   comparison=comparar(conn,old,new)
+   print(json.dumps(comparison,ensure_ascii=False),flush=True)
+   if comparison['status']!='OK':raise ImportacaoError('Comparação identificou divergência real; nenhuma questão será sobrescrita.')
    print(json.dumps(migrar(conn,old,new,False,args.reverter)),flush=True)
    print(json.dumps(migrar(conn,old,new,True,args.reverter)),flush=True)
    result=migrar(conn,old,new,True,args.reverter)
