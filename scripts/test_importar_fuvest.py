@@ -5,7 +5,29 @@ from pathlib import Path
 import re
 import unittest
 
-from importar_fuvest import importar, validar_acervo, ImportacaoError
+from importar_fuvest import importar, validar_acervo, ImportacaoError, configuracao_fuvest
+
+
+
+class ConfiguracaoFuvestTest(unittest.TestCase):
+    def test_remove_quebras_de_linha_dos_campos_de_conexao(self):
+        for sufixo in ("\n", "\r\n", r"\n", r"\r\n", "  "):
+            with self.subTest(sufixo=sufixo):
+                env = {
+                    "DB_HOST": "localhost" + sufixo,
+                    "DB_PORT": "3306" + sufixo,
+                    "DB_NAME": "fuvest_test" + sufixo,
+                    "DB_USUARIO": "editor_test" + sufixo,
+                    "DB_SENHA": "senha com espaços  " + sufixo,
+                    "DB_SSL_MODE": "DISABLED",
+                }
+                config = configuracao_fuvest(env)
+                self.assertEqual("localhost", config["host"])
+                self.assertEqual(3306, config["port"])
+                self.assertEqual("fuvest_test", config["database"])
+                self.assertEqual("editor_test", config["user"])
+                self.assertEqual(env["DB_SENHA"], config["password"])
+                self.assertEqual("localhost" + sufixo, env["DB_HOST"])
 
 
 @unittest.skipUnless(os.environ.get("RUN_MYSQL_TESTS") == "1", "Banco de teste não habilitado")

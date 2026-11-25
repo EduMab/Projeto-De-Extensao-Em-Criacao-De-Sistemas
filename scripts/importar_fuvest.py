@@ -149,6 +149,14 @@ def importar(conn, edicoes, aplicar):
             cur.execute("SELECT RELEASE_LOCK(%s)", (LOCK,))
 
 
+
+def configuracao_fuvest(env):
+    valores = dict(env)
+    for campo in ("DB_HOST", "DB_PORT", "DB_NAME", "DB_USUARIO"):
+        valores[campo] = re.sub(r"(?:\\[rn]|\s)+$", "", valores.get(campo, "")).strip()
+    return configuracao(valores)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     modo = parser.add_mutually_exclusive_group()
@@ -163,7 +171,7 @@ def main():
               flush=True)
         if args.simular or args.aplicar:
             import pymysql
-            with pymysql.connect(**configuracao(os.environ), cursorclass=pymysql.cursors.DictCursor) as conn:
+            with pymysql.connect(**configuracao_fuvest(os.environ), cursorclass=pymysql.cursors.DictCursor) as conn:
                 importar(conn, edicoes, args.aplicar)
     except (ImportacaoError, ValueError, OSError) as erro:
         parser.exit(1, f"Importação interrompida: {erro}\n")
