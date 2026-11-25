@@ -65,11 +65,14 @@ class RevisaoTest(unittest.TestCase):
    if isinstance(v,list):return [js(x) for x in v]
    if isinstance(v,dict):return {k:js(x) for k,x in v.items()}
    return v
+  original=self.old['provas'][0]['questoes'][0]['conteudo']
+  self.assertNotEqual(canon(js(original)),canon(original))
+  self.assertEqual(diferencas_json(js(original),original),[])
   with self.conn.cursor() as cur:
    cur.execute('SELECT id_questao,conteudo_json FROM questao WHERE conteudo_json IS NOT NULL')
    for row in cur.fetchall():cur.execute('UPDATE questao SET conteudo_json=%s WHERE id_questao=%s',(json.dumps(js(json.loads(row['conteudo_json'])),ensure_ascii=False),row['id_questao']))
   self.conn.commit();before=self.estado();result=comparar(self.conn,self.old,self.new)
-  self.assertEqual(result['status'],'OK');self.assertEqual(result['originaisEquivalentes'],364);self.assertGreater(result['diferencasApenasRepresentacao'],0);self.assertEqual(before,self.estado())
+  self.assertEqual(result['status'],'OK');self.assertEqual(result['originaisEquivalentes'],364);self.assertTrue(result['primeiraQuestao']['hashOriginalConfere']);self.assertEqual(before,self.estado())
   self.assertEqual(migrar(self.conn,self.old,self.new,True)['atualizadas'],364)
   self.assertEqual(migrar(self.conn,self.old,self.new,True)['atualizadas'],0)
  def test_coordenada_diferente_com_hash_original_continua_bloqueada(self):
