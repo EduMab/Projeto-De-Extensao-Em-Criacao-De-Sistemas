@@ -59,3 +59,15 @@ ctx.q.conteudo.recortes=[{tipo:'questao',imagem:'/questoes/etec/2026-2/pagina-15
 ctx.container=new Node('div');vm.runInContext('recortesOriginais(q,container)',ctx);assert.equal(ctx.container.children[0].children.length,0);
 const css=fs.readFileSync('src/main/resources/static/simulados.css','utf8');assert.match(css,/\.etec-crop-frame\{[^}]*overflow:hidden/);
 console.log(`OK: ${exibidas} questões ETEC em janelas proporcionais, imagens originais, rejeição de recortes fora da página.`);
+const indiceFuvest=JSON.parse(require('zlib').gunzipSync(fs.readFileSync('src/main/resources/fuvest-recortes.json.gz')));
+for(const [key,row] of Object.entries(indiceFuvest)){
+ ctx.q={numeroOriginal:Number(key.split('/')[1]),prova:'FUVEST '+key.split('/')[0],conteudo:{modo:'recorte_original',recortes:row.recortes}};
+ ctx.container=new Node('div');vm.runInContext('recortesOriginais(q,container)',ctx);
+ const rendered=nodes(ctx.container),images=rendered.filter(n=>n.tagName==='img');
+ assert.equal(images.length,1,key);
+ assert.equal(images[0].src,row.recortes[0].imagem,key);
+ assert.match(images[0].src,/^\/questoes\/fuvest\/\d{4}-[a-f0-9]+-individual-v1\/questao-\d+\.webp$/);
+ assert(!rendered.some(n=>n.className==='page-stage'||n.className==='focus-marker'),key);
+}
+assert.equal(Object.keys(indiceFuvest).length,890);
+console.log('OK: 890 questões FUVEST exibem uma única imagem individual pelo mesmo componente do ENEM.');

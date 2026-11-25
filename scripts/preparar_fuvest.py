@@ -219,6 +219,8 @@ def main():
     acervo = {"formato": 1, "tipo": "FUVEST", "edicoes": edicoes}
     pacote = gzip.compress(json.dumps(acervo, ensure_ascii=False, separators=(",", ":")).encode(), mtime=0)
     (ACERVO / "questoes.json.gz").write_bytes(pacote)
+    from preparar_recortes_fuvest import preparar
+    preparar(edicoes)
     for edicao in edicoes:
         anuladas = [q["numero"] for q in edicao["questoes"] if q["anulada"]]
         multiplas = [q["numero"] for q in edicao["questoes"] if len(q["gabarito"]) > 1]

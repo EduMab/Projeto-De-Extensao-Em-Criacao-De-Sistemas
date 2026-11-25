@@ -188,6 +188,44 @@ class SimuladoDiarioRepositoryTest {
         assertEquals(finalizado,repo.finalizar(1,id));assertTrue(questoes(finalizado).stream().allMatch(q->q.get("gabarito").asText().equals("A")));
         assertEquals(409,assertThrows(ResponseStatusException.class,()->repo.responder(1,id,1,10)).getStatusCode().value());
     }
+    @Test void fuvestApresentaRecorteAoAbrirERetomarSemRegravarSnapshot() throws Exception {
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        try (var source = new java.util.zip.GZIPInputStream(java.nio.file.Files.newInputStream(
+                java.nio.file.Path.of("acervo/fuvest/questoes.json.gz")));
+             var c = DriverManager.getConnection(url); var s = c.createStatement()) {
+            var acervo = mapper.readTree(source);
+            var edicao = java.util.stream.StreamSupport.stream(acervo.path("edicoes").spliterator(), false)
+                    .filter(e -> e.path("ano").asInt() == 2027).findFirst().orElseThrow();
+            s.execute("UPDATE estudante SET objetivo_prova='FUVEST' WHERE id_estudante=1");
+            s.execute("UPDATE prova SET tipo='FUVEST',edicao='2027'");
+            try (var update = c.prepareStatement("UPDATE questao SET conteudo_json=? WHERE id_questao=?")) {
+                for (var q : edicao.path("questoes")) {
+                    update.setString(1, q.path("conteudo").toString());
+                    update.setInt(2, q.path("numero").asInt()); update.executeUpdate();
+                }
+            }
+        }
+        var aberto = repo.iniciar(1, hoje);
+        long id = ((Number) aberto.get("id")).longValue();
+        assertTrue(questoes(aberto).stream().allMatch(q -> "recorte_original".equals(q.path("conteudo").path("modo").asText())));
+        var primeira = questoes(aberto).get(0);
+        int alternativa = primeira.path("alternativas").get(0).path("id").asInt();
+        repo.responder(1, id, 1, alternativa);
+        var retomado = repo.obter(1, id);
+        assertEquals(alternativa, questoes(retomado).get(0).path("alternativaSelecionada").asInt());
+        assertEquals(1, questoes(retomado).get(0).path("conteudo").path("recortes").size());
+        assertFalse(questoes(retomado).get(0).has("gabarito"));
+        try (var c = DriverManager.getConnection(url); var s = c.createStatement();
+             var r = s.executeQuery("SELECT snapshot_json FROM simulado_diario_questao WHERE id_simulado=" + id)) {
+            int total = 0;
+            while (r.next()) {
+                var salvo = mapper.readTree(r.getString(1)).path("conteudo");
+                assertEquals("pagina_original", salvo.path("modo").asText());
+                assertTrue(salvo.has("paginas")); total++;
+            }
+            assertEquals(40, total);
+        }
+    }
     @Test void excluiAnuladasRascunhosEGabaritosInvalidosSemCriarParcial() throws Exception {
         try(var c=DriverManager.getConnection(url);var s=c.createStatement()) {
             s.execute("UPDATE questao SET anulada=1 WHERE id_questao BETWEEN 1 AND 20");

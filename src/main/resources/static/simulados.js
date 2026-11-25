@@ -43,7 +43,7 @@ function recortesOriginais(q, container) {
   const scroll = element("div", undefined, "crop-scroll");
   for (const fragment of fragments) {
     const etec = /^\/questoes\/etec\/\d{4}-[12]\/pagina-\d+\.webp$/.test(fragment.imagem || "");
-    if ((!/^\/questoes\/(concursos|enem)\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "") && !etec)
+    if ((!/^\/questoes\/(concursos|enem|fuvest)\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(fragment.imagem || "") && !etec)
         || !["apoio", "questao"].includes(fragment.tipo)) continue;
     if (etec && !caixaEtecValida(fragment)) continue;
     if (fragment.imagem.startsWith("/questoes/enem/") && fragment.tipo === "apoio" && fragment.necessario !== true) continue;
@@ -92,7 +92,7 @@ function mostrar() {
   $("periodo").hidden = false;
   $("periodo").textContent = `Seleção aberta em ${formatDate(simulado.data)}${simulado.tipo === "ENEM" ? " · " + (simulado.idioma === "ESPANHOL" ? "Espanhol" : "Inglês") : ""} · Intervalo de sete dias até ${formatDate(simulado.proximaLiberacao)}, no horário de Brasília. Consulte e continue os simulados anteriores pelo histórico.`;
   $("fonte").textContent = q.prova + (q.conteudo.idioma ? " · " + (q.conteudo.idioma === "ESPANHOL" ? "Espanhol" : "Inglês") : ""); $("titulo").textContent = `Questão ${indice + 1}`;
-  $("posicao").textContent = `${indice + 1} / 40`; $("questaoOriginal").textContent = `Responda a questão ${String(q.numeroOriginal).padStart(2, "0")} da edição ${q.edicao}.`;
+  $("posicao").textContent = `${indice + 1} / 40`; $("questaoOriginal").textContent = `Questão original ${String(q.numeroOriginal).padStart(2, "0")} · Edição ${q.edicao}`;
   const url = q.conteudo.pdf || q.conteudo.urlProva; $("provaOriginal").href = (url?.startsWith("https://") || /^\/questoes\/(concursos|enem)\//.test(url || "")) ? url : objetivo === "FUVEST" ? "https://www.fuvest.br/acervo-vestibular/" : "https://www.cps.sp.gov.br/etec/vestibulinho/";
   $("paginas").replaceChildren(); $("paginasApoio").replaceChildren(); $("apoio").open = false;
   (q.conteudo.paginas || []).forEach(p => pagina(p, q, $("paginas"), p.numero === q.conteudo.pagina, true));
@@ -186,6 +186,10 @@ async function inicializar() {
     if(objetivo === "ENEM") {
       const footer=document.querySelector("main > footer");
       if(footer?.firstChild)footer.firstChild.textContent="Questões e gabaritos: acervo oficial do INEP. Questões anuladas ficam fora da seleção.";
+    }
+    if(objetivo === "FUVEST") {
+      const footer=document.querySelector("main > footer");
+      if(footer?.firstChild)footer.firstChild.textContent="Questões e gabaritos: acervo oficial da FUVEST. Questões anuladas ficam fora da seleção.";
     }
     document.querySelectorAll("[data-categoria]").forEach(n => n.textContent = categorias[objetivo]);
     $("comecar").disabled = false;

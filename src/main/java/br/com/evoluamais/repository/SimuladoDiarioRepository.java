@@ -216,6 +216,7 @@ public class SimuladoDiarioRepository {
                 while (r.next()) {
                     ObjectNode q = (ObjectNode) json(r.getString("snapshot_json"));
                     if ("ETEC".equals(tipo)) br.com.evoluamais.service.ApresentacaoEtec.aplicar(q);
+                    if ("FUVEST".equals(tipo)) br.com.evoluamais.service.ApresentacaoFuvest.aplicar(q);
                     q.put("posicao", r.getInt("posicao")); int alternativa = r.getInt("id_alternativa");
                     if (r.wasNull()) q.putNull("alternativaSelecionada"); else { q.put("alternativaSelecionada", alternativa); respondidas++; }
                     if (r.getBoolean("acertou")) acertos++;
