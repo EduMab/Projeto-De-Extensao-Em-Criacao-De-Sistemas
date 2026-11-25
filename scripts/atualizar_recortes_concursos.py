@@ -54,7 +54,11 @@ def migrar(conn,old,new,aplicar=False,reverter=False):
     cur.execute('SELECT GET_LOCK(%s,15) adquirido',(lock,))
     if cur.fetchone()['adquirido']!=1:raise ImportacaoError('Outra carga de concursos em execução.')
     acquired.append(lock)
-   validar_schema(cur);conn.begin()
+   validar_schema(cur)
+   cur.execute("SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='questao'")
+   table=cur.fetchone()
+   if not table or table['ENGINE'].upper()!='INNODB':raise ImportacaoError('A tabela questao deve usar InnoDB; nenhuma alteração aplicada.')
+   conn.begin()
    try:
     pending=[];ids=[];core=[]
     for p,n in zip(old['provas'],new['provas'],strict=True):

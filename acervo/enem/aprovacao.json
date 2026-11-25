@@ -1,9 +1,0 @@
-{
-  "previaCommit": "a80a8b72dea65d52ea307b53c65346f07ae57570",
-  "sha256DatasetCanonico": "ce1da6ac4f5fa4d9fd6cb180ba2ca3d6d271cabc1689ce03d82469d33f26423f",
-  "condicoes": [
-    "Questões e imagens da prévia aprovadas por Eduardo",
-    "Usar HTML e CSS existentes; não aplicar moldura da prévia",
-    "Preservar categorias, usuários, respostas e snapshots"
-  ]
-}
