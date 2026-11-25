@@ -53,6 +53,8 @@ jobs:
           sudo apt-get install -y poppler-utils
           python -m pip install -r scripts/requirements-concursos.txt
       - run: python scripts/preparar_fuvest.py
+      - name: Conferir recortes individuais, alternativas e apoios
+        run: python -m unittest discover -s scripts -p test_recortes_fuvest.py -v
       - run: python scripts/importar_fuvest.py
       - name: Testar importação, repetição e conflitos
         run: python -m unittest discover -s scripts -p test_importar_fuvest.py -v

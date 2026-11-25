@@ -1,0 +1,65 @@
+{
+  "total": 890,
+  "edicoes": [
+    {
+      "ano": 2018,
+      "questoes": 90,
+      "apoiosCompartilhados": 9,
+      "sha256Prova": "bde0364dec1c730101584203a45919d6aebeb026c7517ad07fff7ae0e4f89225"
+    },
+    {
+      "ano": 2019,
+      "questoes": 90,
+      "apoiosCompartilhados": 6,
+      "sha256Prova": "b6ff89a26436635f4fed4af7b9480ed5d51b3310c425b16ebde689c789d70728"
+    },
+    {
+      "ano": 2020,
+      "questoes": 90,
+      "apoiosCompartilhados": 7,
+      "sha256Prova": "546ee1a55bc49575b425808ea621a28d3844e7640392294e4d4affc71c3fcd5a"
+    },
+    {
+      "ano": 2021,
+      "questoes": 90,
+      "apoiosCompartilhados": 7,
+      "sha256Prova": "c263cea2fb60468c6085a84473429a967e21c8bc37f200d6d0fff68722f7d8c3"
+    },
+    {
+      "ano": 2022,
+      "questoes": 90,
+      "apoiosCompartilhados": 7,
+      "sha256Prova": "adf72b06ef0ec73b522185ce8c142a96895ab5d54405a39b03cffb8ee5120281"
+    },
+    {
+      "ano": 2023,
+      "questoes": 90,
+      "apoiosCompartilhados": 5,
+      "sha256Prova": "8a9941afd99addd61090c6432c8f8c28bbb6f8ed14d50cb2b8d30dfedf4751ac"
+    },
+    {
+      "ano": 2024,
+      "questoes": 90,
+      "apoiosCompartilhados": 5,
+      "sha256Prova": "f7d6e72253ac8fb23ec2283a5776155e6f5a91ef192c280bcc0e94e167c7f41e"
+    },
+    {
+      "ano": 2025,
+      "questoes": 90,
+      "apoiosCompartilhados": 6,
+      "sha256Prova": "f512449b47ac31abe1ae00d5f88fb14478c7139fa1db137145b7e33cec1b97c8"
+    },
+    {
+      "ano": 2026,
+      "questoes": 90,
+      "apoiosCompartilhados": 9,
+      "sha256Prova": "93b417ad6ea7e81a3b6adc46337920fd71c213306849846723f13583074f9025"
+    },
+    {
+      "ano": 2027,
+      "questoes": 80,
+      "apoiosCompartilhados": 8,
+      "sha256Prova": "b1a54056d72ae1a547a1665bf550b895c59816477ffeaa534995d34b7684177c"
+    }
+  ]
+}
