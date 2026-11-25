@@ -136,11 +136,174 @@ $("sair").onclick = async () => {
     localStorage.removeItem("idEstudante"); localStorage.removeItem("nomeEstudante"); window.location.replace("/login.html");
   } catch (error) { erro(error.message); $("sair").disabled = false; }
 };
+
+async function carregarNotificacoes() {
+  try {
+    const dados = await requisicao("/api/notificacoes");
+    const contador = $("contadorNotificacoes");
+    contador.textContent = dados.naoLidas;
+    contador.hidden = dados.naoLidas === 0;
+    const lista = $("listaNotificacoes");
+    lista.replaceChildren();
+    if (!dados.notificacoes.length) {
+      lista.append(elemento("p", "Você ainda não tem avisos. Quando uma nova etapa do seu plano semanal estiver disponível, ela aparecerá aqui.", "muted"));
+      return;
+    }
+    dados.notificacoes.forEach(item => {
+      const card = elemento("article", undefined, "notification-item" + (item.lida ? "" : " unread"));
+      const conteudo = elemento("div");
+      conteudo.append(elemento("strong", item.titulo), elemento("p", item.mensagem));
+      const a = elemento("a", "Continuar minha preparação →");
+      a.href = item.link || "/simulados.html";
+      a.onclick = async event => {
+        event.preventDefault();
+        try {
+          if (!item.lida) await requisicao("/api/notificacoes/"+item.id+"/lida", {
+            method:"POST", headers:{"X-Evolua-Request":"notificacoes"}
+          });
+        } finally { window.location.assign(a.href); }
+      };
+      conteudo.append(a);
+      card.append(conteudo);
+      if (!item.lida) {
+        const btn = elemento("button", "Marcar como lida", "notification-read");
+        btn.type = "button";
+        btn.onclick = async () => {
+          btn.disabled = true;
+          try {
+            await requisicao("/api/notificacoes/"+item.id+"/lida", {
+              method:"POST", headers:{"X-Evolua-Request":"notificacoes"}
+            });
+            await carregarNotificacoes();
+          } catch (_) { btn.disabled = false; }
+        };
+        card.append(btn);
+      }
+      lista.append(card);
+    });
+  } catch (e) {
+    if (e.message && !e.message.includes("Entre novamente"))
+      $("listaNotificacoes").replaceChildren(elemento("p", "Não foi possível carregar seus avisos agora. Tente novamente.", "muted"));
+  }
+}
+
+function chavePushParaBytes(chave) {
+  const padding = "=".repeat((4 - chave.length % 4) % 4);
+  const base64 = (chave + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = window.atob(base64);
+  return Uint8Array.from([...raw].map(caractere => caractere.charCodeAt(0)));
+}
+
+async function prepararPush() {
+  const botao = $("ativarPush");
+  const estado = $("estadoPush");
+  if (!botao || !estado) return;
+  if (!window.isSecureContext || !("serviceWorker" in navigator) ||
+      !("PushManager" in window) || !("Notification" in window)) {
+    botao.disabled = true;
+    estado.textContent = "Seu navegador ou esta conexão não oferece avisos em segundo plano. Use o Evolua+ em uma conexão HTTPS e um navegador compatível.";
+    return;
+  }
+  try {
+    const config = await requisicao("/api/notificacoes/push/config");
+    if (!config.ativo || !config.chavePublica) {
+      botao.disabled = true;
+      estado.textContent = "Os avisos no dispositivo ainda não foram configurados pelo servidor. Os avisos dentro do painel continuam disponíveis.";
+      return;
+    }
+    const registro = await navigator.serviceWorker.register("/sw.js");
+    const assinaturaAtual = await registro.pushManager.getSubscription();
+    if (Notification.permission === "denied") {
+      botao.disabled = true;
+      estado.textContent = "As notificações estão bloqueadas nas permissões do navegador. Altere essa permissão para ativá-las.";
+      return;
+    }
+    botao.textContent = assinaturaAtual ? "Desativar avisos" : "Ativar avisos";
+    estado.textContent = assinaturaAtual
+      ? "Este dispositivo está inscrito para receber lembretes do Evolua+."
+      : "Receba lembretes de estudo mesmo quando não estiver com o Evolua+ aberto.";
+    botao.onclick = async () => {
+      botao.disabled = true;
+      try {
+        const atual = await registro.pushManager.getSubscription();
+        if (atual) {
+          await requisicao("/api/notificacoes/push/assinatura", {
+            method:"DELETE",
+            headers:{"Content-Type":"application/json","X-Evolua-Request":"notificacoes"},
+            body:JSON.stringify({endpoint:atual.endpoint})
+          });
+          await atual.unsubscribe();
+          estado.textContent = "Avisos desativados neste dispositivo.";
+          botao.textContent = "Ativar avisos";
+          return;
+        }
+        const permissao = await Notification.requestPermission();
+        if (permissao !== "granted") {
+          estado.textContent = "Permissão não concedida. Você ainda pode consultar os avisos dentro do painel.";
+          return;
+        }
+        const nova = await registro.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:chavePushParaBytes(config.chavePublica)
+        });
+        try {
+          await requisicao("/api/notificacoes/push/assinatura", {
+            method:"POST",
+            headers:{"Content-Type":"application/json","X-Evolua-Request":"notificacoes"},
+            body:JSON.stringify(nova.toJSON())
+          });
+        } catch (erro) {
+          await nova.unsubscribe();
+          throw erro;
+        }
+        estado.textContent = "Pronto! Este dispositivo receberá os lembretes do Evolua+.";
+        botao.textContent = "Desativar avisos";
+      } catch (e) {
+        estado.textContent = "Não foi possível atualizar os avisos. Verifique a conexão e tente novamente.";
+      } finally { botao.disabled = false; }
+    };
+  } catch (e) {
+    botao.disabled = true;
+    estado.textContent = "Não foi possível preparar os avisos neste navegador. Os avisos dentro do painel continuam disponíveis.";
+  }
+}
+
+$("abrirNotificacoes").onclick = async () => {
+  const abrir = $("centralNotificacoes").hidden;
+  $("centralNotificacoes").hidden = !abrir;
+  $("abrirNotificacoes").setAttribute("aria-expanded", String(abrir));
+  if (abrir) {
+    await carregarNotificacoes();
+    await prepararPush();
+  }
+};
+$("marcarTodasNotificacoes").onclick = async () => {
+  const botao = $("marcarTodasNotificacoes");
+  botao.disabled = true;
+  try {
+    await requisicao("/api/notificacoes/lidas", {
+      method:"POST", headers:{"X-Evolua-Request":"notificacoes"}
+    });
+    await carregarNotificacoes();
+  } finally { botao.disabled = false; }
+};
+
 async function iniciar() {
   $("carregamento").hidden = false; $("tentarNovamente").hidden = true; erro("");
-  try { perfil = await requisicao("/api/perfil"); renderizar(); }
-  catch (error) { erro(error.message); $("tentarNovamente").hidden = false; }
+  try {
+    perfil = await requisicao("/api/perfil");
+    renderizar();
+    carregarNotificacoes();
+    if (window.location.hash === "#notificacoes") {
+      $("centralNotificacoes").hidden = false;
+      $("abrirNotificacoes").setAttribute("aria-expanded", "true");
+      prepararPush();
+    }
+  } catch (error) { erro(error.message); $("tentarNovamente").hidden = false; }
   finally { $("carregamento").hidden = true; }
 }
 $("tentarNovamente").onclick = iniciar;
+window.setInterval(() => {
+  if (document.visibilityState === "visible") carregarNotificacoes();
+}, 60000);
 iniciar();

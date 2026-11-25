@@ -92,3 +92,39 @@ footer { padding:20px; text-align:center; color:#827b8d; font-size:11px; }
 @media(max-width:850px) { .goal-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .welcome { align-items:flex-start; } .weekly-label { display:none; } .study-art { min-width:150px; padding:20px; } .study-art>span { width:82px; height:82px; font-size:27px; } .dashboard-grid { grid-template-columns:1fr; } }
 @media(max-width:520px) { .topbar { padding:12px 5%; min-height:68px; } .brand { font-size:18px; } .user { gap:12px; font-size:12px; } .quiet { padding:7px 12px; } .container { width:90%; margin-top:25px; } .intro { padding:12px 0 26px; } .intro h1 { font-size:34px; } .intro p { font-size:14px; } .desktop { display:none; } .goal-grid { gap:11px; } .goal-option { padding:20px 14px 16px; } .goal-option:has(input:checked),.goal-option[aria-pressed="true"] { padding:19px 13px 15px; } .goal-option strong { font-size:16px; } .goal-description { font-size:11px; min-height:34px; } .onboarding-footer { flex-direction:column-reverse; text-align:center; gap:18px; } .onboarding-footer .primary { width:100%; } .welcome { margin-bottom:25px; } .welcome h1 { font-size:26px; } .welcome p { font-size:13px; } .section-heading { display:block; } .section-heading p { margin-top:4px; } .study-copy { padding:24px 21px; } .study-copy h2 { font-size:23px; } .study-art { display:none; } .archive { gap:9px 18px; } .study-copy .primary { width:100%; gap:15px; } .card { padding:24px 21px; } }
 @media(prefers-reduced-motion:reduce) { * { transition:none !important; scroll-behavior:auto !important; } }
+
+
+/* Central de notificacoes semanais */
+.notification-trigger { position:relative; border:1px solid var(--line); background:#fff; color:var(--dark); border-radius:9px; padding:8px 12px; font-size:13px; }
+.notification-trigger b { display:inline-grid; place-items:center; min-width:19px; height:19px; margin-left:4px; border-radius:20px; background:var(--purple); color:white; font-size:11px; }
+.notification-center { width:min(520px,92vw); max-height:65vh; overflow:auto; position:absolute; z-index:20; right:max(5%,calc((100% - 1160px)/2)); top:70px; background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 12px 36px #30224420; padding:17px; }
+.notification-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+.notification-heading button,.notification-read { border:0; background:transparent; color:var(--purple); font-size:11px; cursor:pointer; }
+.notification-item { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:14px 4px; border-bottom:1px solid var(--line); }
+.notification-item.unread { background:#f8f5ff; margin:0 -8px; padding:14px 12px; border-radius:9px; }
+.notification-item strong { font-size:13px; }
+.notification-item p { color:var(--muted); font-size:12px; margin:5px 0 7px; }
+.notification-item a { color:var(--purple); font-size:12px; font-weight:bold; text-decoration:none; }
+.notification-read { flex-shrink:0; }
+@media(max-width:560px) {
+  .topbar { flex-wrap:wrap; }
+  .user { gap:9px; font-size:12px; }
+  .notification-trigger span { display:none; }
+  .notification-center { right:4%; top:72px; }
+}
+
+
+/* Preferencias de notificacao, mantendo a identidade visual do Evolua+. */
+.push-preferences { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid var(--line); }
+.push-preferences strong { display:block; color:var(--dark); font-size:13px; }
+.push-preferences p { margin-top:4px; color:var(--muted); font-size:12px; max-width:330px; }
+.push-preferences .secondary { flex-shrink:0; padding:9px 13px; font-size:12px; }
+.notification-item { border-bottom:1px solid var(--line); }
+.notification-item:last-child { border-bottom:0; }
+.notification-item.unread { border-left:3px solid var(--purple); }
+.notification-item a:hover,.notification-heading button:hover,.notification-read:hover { text-decoration:underline; }
+.notification-trigger:focus-visible,.push-preferences button:focus-visible { outline:3px solid #ad91eb; outline-offset:3px; }
+@media(max-width:560px) {
+  .push-preferences { align-items:flex-start; flex-direction:column; }
+  .push-preferences .secondary { width:100%; }
+}

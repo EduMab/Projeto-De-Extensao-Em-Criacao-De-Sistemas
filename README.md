@@ -26,6 +26,12 @@ A interface fica em `/simulados.html`. Ao abrir novamente dentro dos sete dias,
 o estudante retoma as mesmas questões e respostas. A próxima liberação ocorre
 na data de abertura mais sete dias, às 00h de Brasília.
 
+## 🔔 Notificações de estudo
+
+O painel possui uma central de notificações alinhada ao acompanhamento semanal do estudante. O sistema avisa quando a primeira tarefa está disponível, lembra o aluno de retomar um simulado não concluído após três dias e informa quando uma nova etapa semanal é liberada após sete dias.
+
+Além dos avisos dentro do painel, o estudante pode autorizar notificações Web Push no próprio dispositivo. O recurso utiliza Service Worker e chaves VAPID; a permissão é solicitada somente após ação explícita do aluno. Consulte [a documentação de instalação e configuração](doc/NOTIFICACOES_SEMANAIS.md), incluindo as migrações SQL 08 e 09 e as variáveis de ambiente. Execute-as somente depois dos scripts de banco anteriores.
+
 ## 🤖 Inteligência Artificial
 
 A Inteligência Artificial é utilizada para analisar o desempenho do estudante após a realização do simulado.
@@ -52,6 +58,8 @@ A resposta gerada contém recomendações personalizadas de estudo e é armazena
 - CSS
 - JavaScript
 - OpenRouter API
+- Web Push API, Service Worker e VAPID
+- PWA (manifesto para instalação em dispositivos compatíveis)
 - IntelliJ IDEA
 - Git
 - GitHub
