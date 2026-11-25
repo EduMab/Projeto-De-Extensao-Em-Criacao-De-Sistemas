@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulado semanal | Evolua+</title>
+<link rel="stylesheet" href="/simulados.css?v=etec-recortes-1">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/index.html">EVOLUA<span>+</span></a><nav><a href="/index.html">Meu painel</a><button id="sair" class="text-button" type="button">Sair</button></nav></header>
+<main>
+  <section class="hero"><div><p class="eyebrow">SEU PRÓXIMO PASSO COMEÇA AQUI</p><h1>Uma semana de cada vez.<br><span>Uma evolução de verdade.</span></h1><p class="intro">40 questões do seu objetivo por semana, mescladas entre edições, para você praticar no seu ritmo.</p></div><div class="weekly-badge"><strong>40</strong><span>questões por semana</span></div></section>
+  <section class="stats" aria-label="Acervo oficial"><div><strong id="acervoTotal">—</strong><span>questões disponíveis</span></div><div><strong id="acervoEdicoes">—</strong><span>edições oficiais</span></div><div><strong>Você no centro</strong><span>histórico individual de questões</span></div></section>
+  <p id="mensagem" class="message" role="status" aria-live="polite" hidden></p>
+  <section id="inicio" class="card start-card"><div><p class="eyebrow">SIMULADO SEMANAL</p><h2>Pronto para o seu simulado da semana?</h2><p>Começamos pelas questões que ainda não apareceram nos seus simulados. Ao esgotar o acervo, retomamos as vistas há mais tempo.</p><p class="muted">Uma nova seleção fica disponível sete dias após a abertura da anterior, no horário de Brasília. Durante esse intervalo, você continua o mesmo simulado com as respostas salvas. Os anteriores seguem disponíveis no histórico.</p></div><button id="comecar" class="primary" type="button">Abrir simulado da semana <span aria-hidden="true">→</span></button></section>
+  <p id="periodo" class="selection-period" role="status" hidden></p>
+  <section id="resultado" class="card result-card" hidden aria-live="polite"></section>
+  <section id="estudo" class="study-grid" hidden>
+    <aside class="card navigation"><p class="eyebrow">SEU PROGRESSO</p><h2 id="andamento">0 de 40</h2><progress id="progresso" max="40" value="0">0 de 40</progress><p class="muted">Navegue pelas questões. As respostas são salvas a cada escolha.</p><div id="numeros" class="numbers" aria-label="Questões do simulado"></div><div class="legend"><span><i class="dot answered"></i> Respondida</span><span><i class="dot current"></i> Atual</span></div><button id="finalizar" type="button" class="primary finish">Finalizar simulado</button><p id="salvamento" class="save-status" role="status" aria-live="polite"></p></aside>
+    <article class="card question-card"><div class="question-heading"><div><p id="fonte" class="eyebrow"></p><h2 id="titulo"></h2></div><span id="posicao" class="pill"></span></div><div class="original-note"><strong id="questaoOriginal"></strong><span id="notaOriginal">As páginas originais preservam textos, gráficos e fórmulas. Responda somente a questão indicada, mesmo que outras apareçam na página.</span></div><div class="viewer-tools"><a id="provaOriginal" target="_blank" rel="noopener noreferrer">Abrir caderno oficial ↗</a><label>Ampliar <input id="zoom" type="range" min="100" max="250" step="25" value="100" aria-label="Ampliar páginas da prova"></label></div><div id="paginas"></div><details id="apoio" class="support"><summary>Consultar páginas anteriores de apoio</summary><div id="paginasApoio"></div></details><fieldset id="respostas"><legend>Qual alternativa você escolhe?</legend><div id="opcoes" class="options"></div></fieldset><p id="correcao" class="correction" hidden></p><div class="question-actions"><button id="anterior" class="secondary" type="button">← Anterior</button><button id="proxima" class="primary" type="button">Próxima →</button></div></article>
+  </section>
+  <section class="history"><div class="section-heading"><div><p class="eyebrow">CONSISTÊNCIA QUE APARECE</p><h2>Seus últimos simulados</h2></div><span class="muted">Últimos 30 simulados</span></div><div id="historico" class="history-list"><p class="muted">Entre na sua conta para acompanhar seu histórico.</p></div></section>
+  <footer>Questões e gabaritos: acervo oficial do Centro Paula Souza. Questões anuladas ficam fora da seleção.<br>O histórico considera questões selecionadas, mesmo quando o simulado não foi concluído.</footer>
+</main>
+<script src="/simulados.js?v=etec-recortes-1" defer></script>
+</body></html>

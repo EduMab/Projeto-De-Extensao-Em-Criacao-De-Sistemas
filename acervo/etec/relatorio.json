@@ -1,0 +1,144 @@
+{
+  "edicoes": [
+    {
+      "edicao": "2017-1",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2017-2",
+      "questoes": 50,
+      "anuladas": [
+        30,
+        31
+      ],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2018-1",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2018-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2019-1",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2019-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2020-1",
+      "questoes": 50,
+      "anuladas": [
+        23
+      ],
+      "paginas": 21,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2022-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2023-1",
+      "questoes": 40,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2023-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2024-1",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2024-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2025-1",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2025-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 11,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2026-1",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    },
+    {
+      "edicao": "2026-2",
+      "questoes": 50,
+      "anuladas": [],
+      "paginas": 22,
+      "numeracaoConferida": true,
+      "gabaritoConferido": true
+    }
+  ],
+  "total": 790,
+  "anuladas": 3,
+  "ativas": 787,
+  "diasCom40Ineditas": 19,
+  "ineditasRestantes": 27,
+  "apresentacao": "Paginas originais; a interface identifica a questao a responder. Podem aparecer questoes vizinhas.",
+  "limiteValidacao": "Conferencia automatica de numeracao e gabarito; sem classificacao pedagogica individual."
+}

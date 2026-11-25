@@ -1,0 +1,132 @@
+name: Importar dez concursos
+
+on:
+  workflow_dispatch:
+    inputs:
+      aplicar:
+        description: Gravar os dez cadastros (desmarcado apenas simula e reverte)
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - 'scripts/*concursos*'
+      - 'src/**'
+      - 'acervo/concursos/**'
+      - 'pom.xml'
+      - 'Dockerfile'
+      - 'database/01_estrutura.sql'
+      - 'database/06_importacao_10_concursos_ensino_medio.sql'
+      - '.github/workflows/importar-concursos.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: importar-concursos-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  testar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: teste-local
+          MYSQL_DATABASE: evolua_concursos_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pteste-local"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/requirements-concursos.txt
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - run: mvn -B clean package
+      - name: Reutilizar dependências Maven na verificação Docker
+        run: |
+          cp -a "$HOME/.m2/repository/." .docker-build-cache/
+          # O runner e a imagem podem usar IDs de mirror diferentes.
+          # Os artefatos já foram validados pelo clean package acima.
+          find .docker-build-cache -name _remote.repositories -delete
+          find .docker-build-cache -name '*.lastUpdated' -delete
+      - name: Validar imagem usada no deploy
+        run: docker build --build-arg MAVEN_BUILD_FLAGS=-o --tag evoluamais-concursos:test .
+      - run: python -m unittest discover -s scripts -p test_acervo_concursos.py -v
+      - run: python -m unittest discover -s scripts -p test_recortes_concursos.py -v
+      - name: Validar carga, reexecução e reversão no MySQL de teste
+        run: python -m unittest discover -s scripts -p test_importar_concursos.py -v
+        env:
+          RUN_MYSQL_TESTS: '1'
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: evolua_concursos_test
+          DB_USUARIO: root
+          DB_SENHA: teste-local
+          DB_SSL_MODE: DISABLED
+
+      - run: node scripts/test_simulados_recortes.cjs
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Testar substituição atômica e preservação do histórico
+        run: bun scripts/test_substituir_concursos.ts
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: evolua_concursos_test
+          DB_SENHA: teste-local
+
+  importar:
+    if: github.event_name == 'workflow_dispatch'
+    needs: testar
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: concursos
+    concurrency:
+      group: concursos-banco-compartilhado
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/requirements-concursos.txt
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Conferir e executar a carga
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USUARIO: ${{ secrets.DB_USUARIO }}
+          DB_SENHA: ${{ secrets.DB_SENHA }}
+          DB_SSL_MODE: ${{ vars.DB_SSL_MODE || 'VERIFY_IDENTITY' }}
+          DB_SSL_CA: ${{ secrets.DB_SSL_CA }}
+          APLICAR: ${{ inputs.aplicar }}
+        run: |
+          if [ -n "$DB_SSL_CA" ]; then
+            ca_file="$RUNNER_TEMP/concursos-ca.pem"
+            umask 077
+            printf '%s\n' "$DB_SSL_CA" > "$ca_file"
+            export DB_SSL_CA="$ca_file"
+          fi
+          if [ "$APLICAR" = "true" ]; then
+            bun scripts/substituir_concursos.ts --aplicar
+          else
+            bun scripts/substituir_concursos.ts
+          fi
