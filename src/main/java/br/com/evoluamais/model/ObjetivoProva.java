@@ -7,7 +7,7 @@ public enum ObjetivoProva {
     ETEC("ETEC", "Ensino técnico e médio", true),
     ENEM("ENEM", "Seu caminho para a faculdade", false),
     CONCURSO("Concurso público", "Preparação para a carreira pública", true),
-    FUVEST("FUVEST", "Preparação para a USP", false);
+    FUVEST("FUVEST", "Preparação para a USP", true);
 
     private final String nome;
     private final String descricao;
