@@ -239,6 +239,9 @@ Para executar o projeto:
 
 ## ☁️ Publicação na nuvem
 
+Para executar a aplicação com link público sem Render, consulte o
+[guia de publicação no Railway](doc/DEPLOY_RAILWAY.md).
+
 O projeto inclui um Dockerfile para Java 25, configuração do Render Free e
 scripts SQL baseados no MER. Consulte o [guia de publicação](doc/DEPLOY_NUVEM.md)
 para conectar um MySQL remoto, importar os dados e configurar o acesso do grupo.

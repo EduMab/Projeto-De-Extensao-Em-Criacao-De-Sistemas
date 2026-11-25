@@ -36,6 +36,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - run: python -m unittest discover -s scripts -p 'test_publicacao_enem.py' -v
       - run: python -m pip install -r scripts/requirements-enem.txt
       - run: python scripts/preparar_enem_amarelo.py --baixar --somente-validar
       - run: python scripts/renderizar_enem_amarelo.py
@@ -81,6 +82,7 @@ jobs:
       - run: python scripts/renderizar_enem_amarelo.py
       - name: Publicação e carga ENEM aprovadas
         env:
+          EVOLUA_PUBLIC_URL: ${{ vars.EVOLUA_PUBLIC_URL }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}

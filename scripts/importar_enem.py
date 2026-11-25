@@ -2,11 +2,11 @@
 """Carga ENEM isolada, transacional e idempotente; não altera esquema/históricos."""
 from pathlib import Path
 import argparse,concurrent.futures,gzip,hashlib,json,os,re,time,urllib.request,zipfile
+from urllib.parse import urlsplit
 from importar_concursos import configuracao,ImportacaoError,validar_schema
 
 ROOT=Path(__file__).resolve().parents[1]
 ACERVO=ROOT/'acervo/enem'
-ORIGIN='https://evoluamais-api.onrender.com'
 LOCK='evolua_enem_importacao'
 LETRAS='ABCDE'
 ALVO=('thomas.proxy.rlwy.net',23871,'evoluamais')
@@ -39,11 +39,26 @@ def validar():
     if images!=set(expected_images):raise ImportacaoError('Conjunto de imagens divergente.')
     return provas,sorted(images)
 
-def publicacao(images,espera=0):
+def origem_publicacao(valor=None):
+    origem=(valor if valor is not None else os.environ.get('EVOLUA_PUBLIC_URL','')).strip().rstrip('/')
+    try:
+        partes=urlsplit(origem)
+        porta=partes.port
+    except ValueError:
+        raise ImportacaoError('EVOLUA_PUBLIC_URL inválida.') from None
+    local=partes.hostname in ('localhost','127.0.0.1','::1')
+    if (not partes.hostname or partes.username is not None or partes.password is not None
+            or partes.path or partes.query or partes.fragment
+            or (partes.scheme!='https' and not (partes.scheme=='http' and local))):
+        raise ImportacaoError('Configure EVOLUA_PUBLIC_URL com a origem HTTPS da aplicação, sem caminho ou credenciais.')
+    return origem
+
+def publicacao(images,espera=0,origem=None):
+    origem=origem_publicacao(origem)
     until=time.monotonic()+espera
     while True:
         try:
-            with urllib.request.urlopen(ORIGIN+'/simulados.js',timeout=60) as r:script=r.read().decode()
+            with urllib.request.urlopen(origem+'/simulados.js',timeout=60) as r:script=r.read().decode()
             ready='function escolherIdiomaEnem' in script and '(concursos|enem)' in script
         except Exception:ready=False
         print(json.dumps({'status':'VERIFICACAO_PUBLICACAO_ENEM','novoVisual':ready}),flush=True)
@@ -51,7 +66,7 @@ def publicacao(images,espera=0):
         if time.monotonic()>=until:raise ImportacaoError('A aplicação ainda não publicou o suporte ENEM.')
         time.sleep(10)
     def head(path):
-        req=urllib.request.Request(ORIGIN+path,method='HEAD')
+        req=urllib.request.Request(origem+path,method='HEAD')
         with urllib.request.urlopen(req,timeout=30) as r:
             if r.status!=200 or 'image/webp' not in r.headers.get('content-type',''):raise ImportacaoError('Imagem não publicada: '+path)
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:list(pool.map(head,images))
