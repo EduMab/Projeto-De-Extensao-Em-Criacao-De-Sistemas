@@ -26,10 +26,10 @@ public class SimuladoDiarioController {
     private void origem(String header) {
         if (!"simulado".equals(header)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Requisicao invalida.");
     }
-    @GetMapping("/acervo") public Map<String, Object> acervo(@RequestParam(defaultValue="ETEC") String tipo) { return repository.acervo(tipo); }
+    @GetMapping("/acervo") public Map<String, Object> acervo(@RequestParam(defaultValue="ETEC") String tipo, @RequestParam(defaultValue="INGLES") String idioma) { return repository.acervo(tipo,idioma); }
     // As rotas antigas tambem obedecem ao intervalo semanal.
-    @PostMapping({"/atual", "/hoje"}) public Map<String, Object> hoje(HttpSession session, @RequestHeader(value="X-Evolua-Request", required=false) String header) {
-        int id = estudante(session); origem(header); return repository.iniciar(id, LocalDate.now(clock));
+    @PostMapping({"/atual", "/hoje"}) public Map<String, Object> hoje(HttpSession session, @RequestParam(defaultValue="INGLES") String idioma, @RequestHeader(value="X-Evolua-Request", required=false) String header) {
+        int id = estudante(session); origem(header); return repository.iniciar(id, LocalDate.now(clock),idioma);
     }
     @GetMapping("/historico") public List<Map<String, Object>> historico(HttpSession session) { return repository.historico(estudante(session)); }
     @GetMapping("/{id}") public Map<String, Object> obter(@PathVariable long id, HttpSession session) { return repository.obter(estudante(session), id); }

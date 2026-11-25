@@ -15,8 +15,9 @@ class SimuladoDiarioControllerTest {
         class RepositorioVerificado extends SimuladoDiarioRepository {
             int estudante;
             LocalDate dia;
-            @Override public Map<String,Object> iniciar(int estudante, LocalDate dia) {
-                this.estudante=estudante;this.dia=dia;return Map.of("id",123);
+            String idioma;
+            @Override public Map<String,Object> iniciar(int estudante, LocalDate dia, String idioma) {
+                this.estudante=estudante;this.dia=dia;this.idioma=idioma;return Map.of("id",123);
             }
         }
         var repo=new RepositorioVerificado();
@@ -29,6 +30,9 @@ class SimuladoDiarioControllerTest {
             mvc.perform(post(rota+"?data=2099-01-01&idEstudante=99").session(sessao).header("X-Evolua-Request","simulado"))
                     .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(123));
         }
-        assertEquals(7,repo.estudante);assertEquals(LocalDate.of(2026,11,23),repo.dia);
+        assertEquals(7,repo.estudante);assertEquals(LocalDate.of(2026,11,23),repo.dia);assertEquals("INGLES",repo.idioma);
+        mvc.perform(post("/api/simulados-semanais/atual?idioma=ESPANHOL&idEstudante=99").session(sessao).header("X-Evolua-Request","simulado"))
+                .andExpect(status().isOk());
+        assertEquals("ESPANHOL",repo.idioma);assertEquals(7,repo.estudante);
     }
 }

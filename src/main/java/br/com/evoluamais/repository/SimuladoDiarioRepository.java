@@ -17,7 +17,7 @@ import java.util.*;
 @Repository
 public class SimuladoDiarioRepository {
     private static final int INTERVALO_DIAS = 7;
-    private static final Set<String> TIPOS_SEMANAIS = Set.of("ETEC", "CONCURSO", "FUVEST");
+    private static final Set<String> TIPOS_SEMANAIS = Set.of("ETEC", "CONCURSO", "FUVEST", "ENEM");
     @FunctionalInterface public interface Conexoes { Connection abrir() throws SQLException; }
     private final Conexoes conexoes;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -43,13 +43,32 @@ public class SimuladoDiarioRepository {
         return "(SELECT COUNT(DISTINCT a.letra) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.letra IN ("+permitidas+"))";
     }
     private static final String CINCO = TOTAL_ALTERNATIVAS+"=5 AND "+letras("'A','B','C','D','E'")+"=5";
-    private static final String ALTERNATIVAS_VALIDAS = " AND ((p.tipo IN ('ETEC','FUVEST') AND "+CINCO+") OR (p.tipo='CONCURSO' AND (("+CINCO+") OR ("
+    private static final String ALTERNATIVAS_VALIDAS = " AND ((p.tipo IN ('ETEC','FUVEST','ENEM') AND "+CINCO+") OR (p.tipo='CONCURSO' AND (("+CINCO+") OR ("
         +TOTAL_ALTERNATIVAS+"=4 AND "+letras("'A','B','C','D'")+"=4) OR ("+TOTAL_ALTERNATIVAS+"=2 AND "+letras("'C','E'")+"=2))))"
         +" AND (SELECT COUNT(*) FROM alternativa a WHERE a.id_questao=q.id_questao AND a.correta=1)=1";
 
     public Map<String, Object> acervo() { return acervo("ETEC"); }
-    public Map<String, Object> acervo(String tipo) {
+    public Map<String, Object> acervo(String tipo) { return acervo(tipo, "INGLES"); }
+    private static String idioma(String valor) {
+        String escolhido=valor == null ? "INGLES" : valor.toUpperCase(Locale.ROOT);
+        if (!Set.of("INGLES","ESPANHOL").contains(escolhido)) throw erro(HttpStatus.BAD_REQUEST,"Escolha Inglês ou Espanhol.");
+        return escolhido;
+    }
+    private boolean correspondeIdioma(String conteudo, String escolhido) throws SQLException {
+        JsonNode valor=json(conteudo).path("idioma");
+        return valor.isMissingNode() || valor.isNull() || escolhido.equals(valor.asText());
+    }
+    public Map<String, Object> acervo(String tipo, String idiomaEscolhido) {
         if (!TIPOS_SEMANAIS.contains(tipo)) throw erro(HttpStatus.BAD_REQUEST,"Categoria indisponível.");
+        if ("ENEM".equals(tipo)) {
+            String escolhido=idioma(idiomaEscolhido);
+            String consulta="SELECT q.conteudo_json,p.edicao FROM questao q JOIN prova p ON p.id_prova=q.id_prova WHERE p.tipo='ENEM' AND p.status_importacao='VALIDADA' AND q.anulada=0 AND q.conteudo_json IS NOT NULL"+ALTERNATIVAS_VALIDAS;
+            try (var c=conexoes.abrir();var stmt=c.prepareStatement(consulta);var r=stmt.executeQuery()) {
+                int total=0;Set<String> edicoes=new HashSet<>();
+                while(r.next()) if(correspondeIdioma(r.getString("conteudo_json"),escolhido)){total++;edicoes.add(r.getString("edicao"));}
+                return Map.of("tipo",tipo,"idioma",escolhido,"questoesAtivas",total,"edicoes",edicoes.size(),"questoesPorSimulado",40,"intervaloDias",INTERVALO_DIAS,"semanasCom40Ineditas",total/40,"ineditasRestantes",total%40);
+            } catch(SQLException e){throw indisponivel(e);}
+        }
         String sql = """
             SELECT COUNT(*) total, COUNT(DISTINCT q.id_prova) edicoes
             FROM questao q JOIN prova p ON p.id_prova=q.id_prova
@@ -64,7 +83,9 @@ public class SimuladoDiarioRepository {
         } catch (SQLException e) { throw indisponivel(e); }
     }
 
-    public Map<String, Object> iniciar(int estudante, LocalDate dia) {
+    public Map<String, Object> iniciar(int estudante, LocalDate dia) { return iniciar(estudante,dia,"INGLES"); }
+    public Map<String, Object> iniciar(int estudante, LocalDate dia, String idiomaEscolhido) {
+        String escolhido=idioma(idiomaEscolhido);
         try (Connection c = conexoes.abrir()) {
             c.setAutoCommit(false);
             try {
@@ -98,7 +119,7 @@ public class SimuladoDiarioRepository {
                     var resultado = carregar(c, estudante, existente);
                     c.commit(); return resultado;
                 }
-                var candidatas = candidatas(c, estudante, objetivo);
+                var candidatas = candidatas(c, estudante, objetivo, escolhido);
                 List<Integer> ids;
                 try { ids = seletor.selecionar(candidatas, 40, new Random()); }
                 catch (IllegalStateException e) { throw erro(HttpStatus.CONFLICT, e.getMessage()); }
@@ -110,7 +131,9 @@ public class SimuladoDiarioRepository {
                 try (var s = c.prepareStatement("INSERT INTO simulado_diario_questao(id_simulado,posicao,id_questao,snapshot_json) VALUES (?,?,?,?)")) {
                     for (int i = 0; i < ids.size(); i++) {
                         s.setLong(1, simulado); s.setInt(2, i + 1); s.setInt(3, ids.get(i));
-                        s.setString(4, snapshot(c, ids.get(i)).toString()); s.addBatch();
+                        var congelada=snapshot(c, ids.get(i));
+                        if("ENEM".equals(objetivo)) congelada.put("idiomaSimulado",escolhido);
+                        s.setString(4, congelada.toString()); s.addBatch();
                     }
                     s.executeBatch();
                 }
@@ -121,9 +144,9 @@ public class SimuladoDiarioRepository {
         catch (Exception e) { throw indisponivel(e); }
     }
 
-    private List<SeletorQuestoesDiarias.Candidata> candidatas(Connection c, int estudante, String tipo) throws SQLException {
+    private List<SeletorQuestoesDiarias.Candidata> candidatas(Connection c, int estudante, String tipo, String escolhido) throws SQLException {
         String sql = """
-            SELECT q.id_questao,p.codigo,
+            SELECT q.id_questao,p.codigo,q.conteudo_json,
               (SELECT MAX(h.dia) FROM (
                 SELECT sq.id_questao,s.id_estudante,s.data_simulado dia
                   FROM simulado_diario_questao sq JOIN simulado_diario s ON s.id_simulado=sq.id_simulado
@@ -136,7 +159,7 @@ public class SimuladoDiarioRepository {
         try (var s = c.prepareStatement(sql)) {
             s.setInt(1, estudante); s.setString(2,tipo);
             try (var r = s.executeQuery()) {
-                while (r.next()) { var data = r.getDate("ultima"); resultado.add(new SeletorQuestoesDiarias.Candidata(r.getInt("id_questao"), r.getString("codigo"), data == null ? null : data.toLocalDate())); }
+                while (r.next()) { if("ENEM".equals(tipo) && !correspondeIdioma(r.getString("conteudo_json"),escolhido))continue; var data = r.getDate("ultima"); resultado.add(new SeletorQuestoesDiarias.Candidata(r.getInt("id_questao"), r.getString("codigo"), data == null ? null : data.toLocalDate())); }
             }
         }
         return resultado;
@@ -151,6 +174,8 @@ public class SimuladoDiarioRepository {
                 node.put("idQuestao", questao); node.put("numeroOriginal", r.getInt("numero_original"));
                 node.put("prova", r.getString("prova_nome")); node.put("edicao", r.getString("edicao"));
                 node.put("enunciado", r.getString("enunciado")); node.set("conteudo", json(r.getString("conteudo_json")));
+                JsonNode original=node.path("conteudo").path("numeroOriginal");
+                if(original.isIntegralNumber() && original.asInt()>0)node.put("numeroOriginal",original.asInt());
             }
         }
         var alternativas = node.putArray("alternativas"); int corretas = 0;
@@ -203,6 +228,7 @@ public class SimuladoDiarioRepository {
         result.put("id", id); result.put("data", dia); result.put("tipo", tipo); result.put("concluido", concluido);
         result.put("intervaloDias", INTERVALO_DIAS);
         result.put("proximaLiberacao", LocalDate.parse(dia).plusDays(INTERVALO_DIAS).toString());
+        if("ENEM".equals(tipo) && !questoes.isEmpty())result.put("idioma",questoes.get(0).path("idiomaSimulado").asText("INGLES"));
         result.put("respondidas", respondidas); result.put("total", questoes.size()); result.put("questoes", questoes);
         if (concluido) { result.put("acertos", acertos); result.put("percentual", acertos * 100.0 / 40); }
         return result;

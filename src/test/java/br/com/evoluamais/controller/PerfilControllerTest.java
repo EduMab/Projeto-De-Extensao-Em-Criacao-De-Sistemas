@@ -20,6 +20,7 @@ class PerfilControllerTest {
         url = "jdbc:h2:mem:"+UUID.randomUUID()+";MODE=MySQL;DB_CLOSE_DELAY=-1";
         try(var c=DriverManager.getConnection(url);var s=c.createStatement()) {
             s.execute("CREATE TABLE usuario(id_usuario INT PRIMARY KEY,nome VARCHAR(100))");
+            s.execute("CREATE TABLE prova(id_prova INT PRIMARY KEY,tipo VARCHAR(20),status_importacao VARCHAR(20),ano INT,codigo VARCHAR(160))");
             s.execute("CREATE TABLE estudante(id_estudante INT PRIMARY KEY,id_usuario INT,id_prova INT,objetivo_prova VARCHAR(20) DEFAULT NULL)");
             s.execute("INSERT INTO usuario VALUES(1,'Ana'),(2,'Bruno')");
             s.execute("INSERT INTO estudante(id_estudante,id_usuario,id_prova) VALUES(10,1,1),(20,2,1)");
@@ -39,6 +40,18 @@ class PerfilControllerTest {
                 .andExpect(jsonPath("$.objetivo").isEmpty()).andExpect(jsonPath("$.objetivos.length()").value(4))
                 .andExpect(jsonPath("$.objetivos[0].simuladoDisponivel").value(true))
                 .andExpect(jsonPath("$.objetivos[1].simuladoDisponivel").value(false));
+    }
+
+    @Test void enemSoFicaDisponivelDepoisDaCargaCompletaSemMudarOutrosObjetivos() throws Exception {
+        try(var c=DriverManager.getConnection(url);var s=c.createStatement()) {
+            for(int i=0;i<19;i++)s.execute("INSERT INTO prova VALUES("+i+",'ENEM','VALIDADA',"+(2017+i/2)+",'ENEM-"+(2017+i/2)+"-DIA-"+(i%2+1)+"-AMARELO')");
+        }
+        mvc.perform(get("/api/perfil").session(sessao)).andExpect(jsonPath("$.objetivos[1].simuladoDisponivel").value(false));
+        try(var c=DriverManager.getConnection(url);var s=c.createStatement()) {
+            s.execute("INSERT INTO prova VALUES(19,'ENEM','VALIDADA',2026,'ENEM-2026-DIA-2-AMARELO')");
+        }
+        mvc.perform(get("/api/perfil").session(sessao)).andExpect(jsonPath("$.objetivos[1].simuladoDisponivel").value(true))
+            .andExpect(jsonPath("$.objetivos[0].simuladoDisponivel").value(true));
     }
 
     @Test void salvaAsQuatroOpcoesNoBancoEPreservaEmOutraSessao() throws Exception {

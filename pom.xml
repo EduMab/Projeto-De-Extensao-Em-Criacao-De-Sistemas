@@ -72,6 +72,9 @@
                                     <fileset dir="${project.basedir}/acervo/concursos">
                                         <include name="recortes-*.zip"/>
                                     </fileset>
+                                    <fileset dir="${project.basedir}/acervo/enem">
+                                        <include name="recortes-*.zip"/>
+                                    </fileset>
                                 </unzip>
                             </target>
                         </configuration>
