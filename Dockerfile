@@ -16,6 +16,8 @@ RUN python3 -m venv /tmp/enem-python \
     && /tmp/enem-python/bin/python scripts/preparar_enem_amarelo.py --baixar --somente-validar \
     && /tmp/enem-python/bin/python scripts/renderizar_enem_amarelo.py \
     && /tmp/enem-python/bin/python scripts/importar_enem.py
+RUN /tmp/enem-python/bin/python scripts/preparar_previa_concursos_enem.py \
+    && /tmp/enem-python/bin/python scripts/empacotar_revisao_concursos.py
 COPY .docker-build-cache /root/.m2/repository
 ARG MAVEN_BUILD_FLAGS=""
 RUN mvn -B -ntp ${MAVEN_BUILD_FLAGS} clean package

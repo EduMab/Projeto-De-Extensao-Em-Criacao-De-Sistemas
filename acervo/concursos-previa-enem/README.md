@@ -1,4 +1,4 @@
-# Concursos no padrão ENEM — prévia aguardando aprovação
+# Concursos no padrão ENEM — revisão aprovada
 
 Pedido de Eduardo: apresentar as perguntas como recortes originais, com a mesma
 semântica do ENEM, preservar o layout e entregar prévia antes de publicar.
@@ -34,10 +34,40 @@ O HTML é autocontido e contém todas as 364 questões. O PDF resume 14 casos,
 cobrindo todas as provas, apoio dispensável/necessário, texto integrado, figuras,
 fórmulas, mudança de coluna e a questão anulada.
 
-## Limite desta proposta
+## Aprovação e publicação
 
-Não publicar, mesclar em `main`, executar importadores ou modificar a função
-Railway antes da confirmação de Eduardo sobre esta nova prévia.
-Depois da aprovação, preparar a integração e a migração dos metadados/imagens
-preservando usuários, respostas e snapshots existentes. Esta prévia não executa
-nenhuma alteração no banco e não presume que a migração posterior já está pronta.
+Eduardo aprovou a prévia e autorizou a integração (“certo, manda bala pae”).
+`aprovacao.json` fixa o dataset e os SHA-256 das 395 imagens aprovadas. O build
+Docker usa as mesmas bibliotecas fixadas da prévia e empacota as imagens sem
+alterar o arquivo original de 364 questões nem seus pacotes antigos.
+As mudanças posteriores da ETEC na main são preservadas; esta revisão não
+modifica HTML, CSS, JavaScript de produção ou esquema.
+
+A nova rotina `atualizar_recortes_concursos.py` exige que os 10 cadernos PCI já
+estejam validados. Confere os números, enunciados, alternativas, gabaritos e
+hashes originais/revisados antes de modificar apenas `conteudo_json` e
+`hash_fonte` nas mesmas linhas. Não insere nem exclui registros. Os snapshots
+existentes continuam com os recortes antigos, mantidos no mesmo JAR.
+
+O workflow `revisar-recortes-concursos.yml` usa os segredos já existentes do
+ambiente GitHub `concursos`, sem ampliar permissões ou configurar credenciais.
+O alvo é exclusivamente o MySQL `thomas.proxy.rlwy.net:23871/evoluamais` do
+projeto Railway `17289eb2-f99d-4bef-a828-3baab021fc4e`, ambiente
+`c94f6079-c405-4327-9aeb-7a3ea8a6bf10`. A função `PreparacaoBanco` não é
+modificada nem reimplantada; sua referência imutável permanece intacta.
+
+Antes de ler credenciais/conectar, a rotina baixa as 395 imagens públicas do
+Render e compara os hashes com a prévia aprovada. Publicação pendente ou bytes
+diferentes interrompem a carga. Não se deve contornar essa condição.
+
+A transação usa as mesmas duas travas das cargas anteriores. Faz simulação
+revertida, aplicação e reexecução com zero alterações. Compara os registros de
+respostas, estudantes, simulados e snapshots, alternativas, provas e questões de
+outras categorias; não consulta senhas e não escreve em usuários. Os testes em
+MySQL isolado também comparam integralmente os usuários e demais registros.
+
+Para reversão, `python scripts/atualizar_recortes_concursos.py --reverter`
+confere os recursos originais publicados e restaura somente os metadados/hash
+dos mesmos IDs. Também é transacional e idempotente. Não executar a reversão
+sem uma solicitação específica. A automação antiga de concursos deve permanecer
+pausada; não reexecutar importadores antigos após aplicar esta revisão.
