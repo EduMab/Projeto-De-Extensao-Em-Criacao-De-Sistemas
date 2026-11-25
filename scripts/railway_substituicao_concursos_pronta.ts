@@ -100,9 +100,7 @@ export async function substituirConcursos(sql: SQL, dataset: any, aplicar=true) 
 }
 
 
-// Acrescente este driver à parte exportada de substituir_concursos.ts,
-// substituindo a7b4ede0c087abfcabc18b951884d1252a535027 pelo commit revisado. Envie o arquivo completo
-// à função PreparacaoBanco. Usa as credenciais já configuradas nessa função.
+// Execução completa e fixada no acervo revisado; usa as variáveis existentes da função PreparacaoBanco.
 const ACERVO_COMMIT='a7b4ede0c087abfcabc18b951884d1252a535027';
 const env=Bun.env;
 if(env.DB_NAME!=='evoluamais'||!env.DB_ROOT_PASSWORD||!/^[a-f0-9]{40}$/.test(ACERVO_COMMIT))throw Error('Configuração ausente');
