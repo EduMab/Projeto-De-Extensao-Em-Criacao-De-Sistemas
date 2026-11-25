@@ -20,9 +20,9 @@ def add(year,day,key,title):
     examples.append({'id':proof['codigo']+key,'ano':year,'dia':day,'numero':q['numeroOriginal'],
         'idioma':q['idioma'],'area':q['disciplina'],'titulo':title,'gabarito':q['gabarito'],
         'anulada':q['anulada'],'urlProva':proof['urlProva'],'recortes':q['conteudo']['recortes']})
-add(2026,2,'098','Cálculo e interpretação · sem bloco extra')
+add(2026,2,'098','Questão direta · sem bloco extra')
 add(2026,2,'095','Circuito elétrico · figura preservada')
-add(2026,2,'161','Tabela e cálculo · proporção original')
+add(2026,2,'161','Dados e cálculo · proporção original')
 add(2026,1,'001-ingles','Inglês · texto integrado à questão')
 add(2026,1,'001-espanhol','Espanhol · texto integrado à questão')
 add(2025,1,'005-espanhol','Charge · somente a questão atual')
