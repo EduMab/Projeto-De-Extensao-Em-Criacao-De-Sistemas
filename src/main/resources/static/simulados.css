@@ -4,3 +4,6 @@
 
 /* Cada recorte preserva a proporção e a tipografia do caderno original. */
 .crop-scroll{overflow-x:auto;padding:2px}.question-crop-card{width:calc((var(--crop-width,400px) + 28px) * var(--crop-scale,1));max-width:100%;padding:14px;margin:0 auto 16px;border:1px solid var(--line);border-radius:10px;background:white}.question-crop-card:last-child{margin-bottom:0}.question-crop-card img{display:block;width:100%;height:auto}.crop-heading{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--purple);margin:0 0 10px}.cropped-question .options{grid-template-columns:repeat(auto-fit,minmax(50px,1fr))}@media(min-width:851px){.question-crop-card{max-width:none}}
+
+/* Leitura individual dos simulados anteriores à importação dos recortes. */
+.legacy-question{--crop-width:650px;color:var(--ink);font-family:Arial,sans-serif}.legacy-question .question-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.65;margin:0 0 16px}.legacy-question .original-alternatives p{margin:0 0 12px}.legacy-question .original-alternatives p:last-child{margin-bottom:0}

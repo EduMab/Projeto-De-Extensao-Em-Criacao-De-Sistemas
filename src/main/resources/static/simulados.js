@@ -51,6 +51,23 @@ function recortesOriginais(q, container) {
   }
   container.append(scroll);
 }
+// As seleções anteriores conservam o conteúdo e as respostas originais.
+// Exibe seu enunciado individualmente, sem incorporar o caderno inteiro.
+function questaoIndividual(q, container) {
+  const scroll = element("div", undefined, "crop-scroll");
+  if (q.conteudo.textoApoio?.trim()) {
+    const support = element("section", undefined, "question-crop-card legacy-question");
+    support.append(element("p", "TEXTO DE APOIO", "crop-heading"),
+      element("p", q.conteudo.textoApoio, "question-text"));
+    scroll.append(support);
+  }
+  const card = element("section", undefined, "question-crop-card legacy-question");
+  card.append(element("p", `QUESTÃO ${String(q.numeroOriginal).padStart(2, "0")}`, "crop-heading"),
+    element("p", q.enunciado, "question-text"));
+  const alternatives = element("div", undefined, "original-alternatives");
+  for (const a of q.alternativas) alternatives.append(element("p", `${a.letra}) ${a.texto}`, "question-text"));
+  card.append(alternatives); scroll.append(card); container.append(scroll);
+}
 function mostrar() {
   if (!simulado) return; const q = simulado.questoes[indice];
   $("inicio").hidden = true; $("estudo").hidden = false;
@@ -70,17 +87,12 @@ function mostrar() {
     : "As páginas originais preservam textos, gráficos e fórmulas. Responda somente a questão indicada, mesmo que outras apareçam na página.";
   if (recortada) recortesOriginais(q, $("paginas"));
   if (q.conteudo.modo === "pdf_original") {
-    const texto = element("p", q.enunciado, "question-text"); texto.style.whiteSpace = "pre-wrap";
-    $("paginas").append(texto);
-    const pdf = q.conteudo.pdf;
-    if (/^\/questoes\/concursos\/[a-z0-9-]+\/prova\.pdf#page=\d+$/.test(pdf || "")) {
-      $("paginas").append(element("p", `Caderno completo: consulte a questão ${q.numeroOriginal} na página ${q.conteudo.pagina}. Textos de apoio podem começar nas páginas anteriores.`, "page-label"));
-      const frame = element("iframe"); frame.src = pdf; frame.title = `Caderno ${q.prova}`; frame.style.width = "100%"; frame.style.height = "650px";
-      $("paginas").append(frame);
-    }
+    $("estudo").classList.add("cropped-question");
+    $("notaOriginal").textContent = "Veja somente o enunciado e as alternativas da questão atual. O texto de apoio aparece antes, quando disponível.";
+    questaoIndividual(q, $("paginas"));
   }
   $("opcoes").replaceChildren();
-  q.alternativas.forEach(a => { const label = element("label", undefined, "option"), input = element("input"), text = element("span", q.conteudo.modo === "pdf_original" ? `${a.letra}) ${a.texto}` : a.letra); input.type = "radio"; input.name = "alternativa"; input.value = a.id; input.checked = q.alternativaSelecionada === a.id; input.setAttribute("aria-label", `Alternativa ${a.letra}`); input.onchange = () => salvar(q, a.id); label.append(input, text); $("opcoes").append(label); });
+  q.alternativas.forEach(a => { const label = element("label", undefined, "option"), input = element("input"), text = element("span", a.letra); input.type = "radio"; input.name = "alternativa"; input.value = a.id; input.checked = q.alternativaSelecionada === a.id; input.setAttribute("aria-label", `Alternativa ${a.letra}`); input.onchange = () => salvar(q, a.id); label.append(input, text); $("opcoes").append(label); });
   $("correcao").hidden = !simulado.concluido;
   if (simulado.concluido) $("correcao").textContent = `${q.acertou ? "Você acertou." : "Você errou."} ${q.conteudo.gabaritoPreliminar ? "Gabarito preliminar da fonte" : "Gabarito oficial"}: alternativa ${q.gabarito}.`;
   $("finalizar").hidden = simulado.concluido; progresso(); bloquear(false);

@@ -13,3 +13,30 @@ assert.equal(container.children[0].children.at(-1).children[0].textContent,'QUES
 for(const card of container.children[0].children)assert.match(card.children[1].src,/^\/questoes\/concursos\//);
 ctx.q.conteudo.recortes=[{tipo:'questao',imagem:'https://example.invalid/x.webp'}];ctx.container=new Node('div');vm.runInContext('recortesOriginais(q,container)',ctx);assert.equal(ctx.container.children[0].children.length,0);
 console.log('OK: apoio antes da questão, imagens locais e rejeição de URL externa');
+const antigos=JSON.parse(require('zlib').gunzipSync(fs.readFileSync('acervo/concursos/questoes.json.gz')));
+const fortaleza=antigos.provas.find(p=>p.codigo.startsWith('FORTALEZA-'));
+const legacy=fortaleza.questoes.find(q=>q.numero===68);
+ctx.q={...legacy,numeroOriginal:legacy.numero,prova:fortaleza.nome};ctx.container=new Node('div');
+vm.runInContext('questaoIndividual(q,container)',ctx);
+const nodes=n=>[n,...n.children.flatMap(nodes)];
+let rendered=nodes(ctx.container);
+assert(!rendered.some(n=>n.tagName==='iframe'));
+assert(rendered.some(n=>n.textContent===legacy.enunciado));
+for(const a of legacy.alternativas)assert(rendered.some(n=>n.textContent===`${a.letra}) ${a.texto}`));
+assert(rendered.some(n=>n.textContent==='QUESTÃO 68'));
+ctx.q.conteudo.textoApoio='Texto de apoio <script>sem HTML executável</script>';
+ctx.container=new Node('div');vm.runInContext('questaoIndividual(q,container)',ctx);
+assert.equal(ctx.container.children[0].children[0].children[0].textContent,'TEXTO DE APOIO');
+assert.equal(ctx.container.children[0].children[0].children[1].textContent,ctx.q.conteudo.textoApoio);
+assert(!nodes(ctx.container).some(n=>['iframe','script'].includes(n.tagName)));
+console.log('OK: Fortaleza 68 e demais snapshots antigos exibem questão, alternativas e apoio sem PDF embutido; textos tratados como texto.');
+let totalAntigas=0;
+for(const prova of antigos.provas)for(const original of prova.questoes){
+ ctx.q={...original,numeroOriginal:original.numero,prova:prova.nome};ctx.container=new Node('div');
+ vm.runInContext('questaoIndividual(q,container)',ctx);const rendered=nodes(ctx.container);
+ assert(!rendered.some(n=>n.tagName==='iframe'));
+ assert(rendered.some(n=>n.textContent===original.enunciado));
+ for(const a of original.alternativas)assert(rendered.some(n=>n.textContent===`${a.letra}) ${a.texto}`));
+ totalAntigas++;
+}
+console.log(`OK: ${totalAntigas} questões antigas preservam enunciados e alternativas na apresentação individual.`);
