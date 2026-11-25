@@ -71,3 +71,16 @@ confere os recursos originais publicados e restaura somente os metadados/hash
 dos mesmos IDs. Também é transacional e idempotente. Não executar a reversão
 sem uma solicitação específica. A automação antiga de concursos deve permanecer
 pausada; não reexecutar importadores antigos após aplicar esta revisão.
+
+## Comparação de produção
+
+A rotina faz uma transação somente leitura antes de migrar e emite um resumo
+de equivalência das 364 questões, sem dados pessoais. O hash de origem continua
+obrigatoriamente igual ao original ou ao revisado aprovado. A comparação JSON
+aceita apenas representações equivalentes do mesmo número (`56` e `56.0`),
+sem confundir números com booleanos ou strings. Textos, URLs, campos extras,
+ordem de listas e mudanças no valor de coordenadas continuam bloqueando a carga.
+Os hashes dos arquivos/imagens aprovados não são recalculados nem relaxados.
+O relatório identifica os caminhos JSON divergentes e bloqueia qualquer escrita
+se encontrar diferença real. Testes reproduzem a serialização numérica JavaScript
+e verificam que uma coordenada realmente diferente continua rejeitada.
